@@ -156,6 +156,11 @@ class MouseController:
             y: Y coordinate or None for current position
             delay: Delay after operation
         """
+        from ..exceptions import VNCStateError
+
+        if not self._connection.is_connected:
+            raise VNCStateError("Not connected to VNC server")
+
         # Use current position if coordinates not specified
         click_x = x if x is not None else self._current_position[0]
         click_y = y if y is not None else self._current_position[1]

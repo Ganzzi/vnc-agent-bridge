@@ -29,6 +29,11 @@ class ScrollController:
             VNCInputError: If amount is negative
             VNCStateError: If not connected
         """
+        from ..exceptions import VNCStateError
+
+        if not self._connection.is_connected:
+            raise VNCStateError("Not connected to VNC server")
+
         if amount < 0:
             raise VNCInputError(f"Scroll amount must be non-negative: {amount}")
 
@@ -50,6 +55,11 @@ class ScrollController:
             VNCInputError: If amount is negative
             VNCStateError: If not connected
         """
+        from ..exceptions import VNCStateError
+
+        if not self._connection.is_connected:
+            raise VNCStateError("Not connected to VNC server")
+
         if amount < 0:
             raise VNCInputError(f"Scroll amount must be non-negative: {amount}")
 
@@ -72,6 +82,11 @@ class ScrollController:
             VNCInputError: If coordinates are invalid
             VNCStateError: If not connected
         """
+        from ..exceptions import VNCStateError
+
+        if not self._connection.is_connected:
+            raise VNCStateError("Not connected to VNC server")
+
         self._validate_coordinates(x, y)
 
         # Move to position first

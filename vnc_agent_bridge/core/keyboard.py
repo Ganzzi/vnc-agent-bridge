@@ -97,6 +97,11 @@ class KeyboardController:
             VNCInputError: If text contains unsupported characters
             VNCStateError: If not connected
         """
+        from ..exceptions import VNCStateError
+
+        if not self._connection.is_connected:
+            raise VNCStateError("Not connected to VNC server")
+
         if not text:
             raise VNCInputError("Text cannot be empty")
 
@@ -126,6 +131,11 @@ class KeyboardController:
             VNCInputError: If key is unknown
             VNCStateError: If not connected
         """
+        from ..exceptions import VNCStateError
+
+        if not self._connection.is_connected:
+            raise VNCStateError("Not connected to VNC server")
+
         keycode = self._get_keycode(key)
         if keycode is None:
             raise VNCInputError(f"Unknown key: {key}")
@@ -152,6 +162,11 @@ class KeyboardController:
             hotkey('ctrl', 'c')  # Ctrl+C
             hotkey('alt', 'f4')  # Alt+F4
         """
+        from ..exceptions import VNCStateError
+
+        if not self._connection.is_connected:
+            raise VNCStateError("Not connected to VNC server")
+
         if len(keys) < 2:
             raise VNCInputError("Hotkey requires at least 2 keys (modifier + main)")
 
@@ -214,6 +229,11 @@ class KeyboardController:
             VNCInputError: If key is unknown
             VNCStateError: If not connected
         """
+        from ..exceptions import VNCStateError
+
+        if not self._connection.is_connected:
+            raise VNCStateError("Not connected to VNC server")
+
         keycode = self._get_keycode(key)
         if keycode is None:
             raise VNCInputError(f"Unknown key: {key}")
