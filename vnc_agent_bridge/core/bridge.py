@@ -28,6 +28,7 @@ from .connection import VNCConnection
 from .mouse import MouseController
 from .keyboard import KeyboardController
 from .scroll import ScrollController
+from .clipboard import ClipboardController
 from vnc_agent_bridge.exceptions import VNCStateError
 
 if TYPE_CHECKING:
@@ -64,6 +65,7 @@ class VNCAgentBridge:
         self._mouse: Optional[MouseController] = None
         self._keyboard: Optional[KeyboardController] = None
         self._scroll: Optional[ScrollController] = None
+        self._clipboard: Optional[ClipboardController] = None
         self._framebuffer: Optional["FramebufferManager"] = None
         self._screenshot: Optional["ScreenshotController"] = None
         self._video: Optional["VideoRecorder"] = None
@@ -76,6 +78,7 @@ class VNCAgentBridge:
         self._mouse = MouseController(self._connection)
         self._keyboard = KeyboardController(self._connection)
         self._scroll = ScrollController(self._connection)
+        self._clipboard = ClipboardController(self._connection)
 
         # Initialize framebuffer-dependent components if dependencies available
         try:
@@ -116,6 +119,7 @@ class VNCAgentBridge:
         self._mouse = None
         self._keyboard = None
         self._scroll = None
+        self._clipboard = None
         self._framebuffer = None
         self._screenshot = None
         self._video = None
@@ -166,6 +170,20 @@ class VNCAgentBridge:
         if self._scroll is None:
             raise RuntimeError("Not connected. Call connect() first.")
         return self._scroll
+
+    @property
+    def clipboard(self) -> ClipboardController:
+        """Access clipboard controller.
+
+        Returns:
+            ClipboardController instance
+
+        Raises:
+            RuntimeError: If not connected
+        """
+        if self._clipboard is None:
+            raise RuntimeError("Not connected. Call connect() first.")
+        return self._clipboard
 
     @property
     def screenshot(self) -> "ScreenshotController":

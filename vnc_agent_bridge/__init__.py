@@ -5,6 +5,7 @@ __version__ = "0.1.0"
 
 # Import main classes and exceptions
 from .core.bridge import VNCAgentBridge
+from .core.clipboard import ClipboardController
 from .exceptions import (
     VNCException,
     VNCConnectionError,
@@ -16,6 +17,7 @@ from .exceptions import (
 
 __all__ = [
     "VNCAgentBridge",
+    "ClipboardController",
     "VNCException",
     "VNCConnectionError",
     "VNCTimeoutError",
