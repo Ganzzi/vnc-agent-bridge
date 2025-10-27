@@ -23,8 +23,16 @@ Example:
         button = MouseButton.LEFT
 """
 
-from enum import IntEnum
-from typing import Tuple, Union
+from enum import IntEnum, Enum
+from typing import Tuple, Union, TYPE_CHECKING, Any
+from dataclasses import dataclass
+
+if TYPE_CHECKING:
+    import numpy as np
+    from PIL import Image
+else:
+    np = None  # type: ignore
+    Image = None  # type: ignore
 
 # Position type for coordinates
 Position = Tuple[int, int]
@@ -65,6 +73,44 @@ KeyType = Union[str, int]
 # Button type for mouse operations
 ButtonType = Union[str, int, MouseButton]
 
+
+# Image formats for screenshot export
+class ImageFormat(str, Enum):
+    """Image format constants for screenshot export."""
+
+    PNG = "png"
+    JPEG = "jpeg"
+    BMP = "bmp"
+
+
+# Frame data type for numpy arrays
+FrameData = Any  # np.ndarray with shape: (height, width, 4) RGBA uint8
+
+# Image type union for flexible image handling
+ImageType = Any  # Union[np.ndarray, Image.Image]
+
+
+# Video frame dataclass for recording
+@dataclass
+class VideoFrame:
+    """Single video frame with metadata."""
+
+    timestamp: float
+    data: Any  # np.ndarray
+    frame_number: int
+
+
+# Framebuffer configuration
+@dataclass
+class FramebufferConfig:
+    """Framebuffer configuration."""
+
+    width: int
+    height: int
+    pixel_format: bytes
+    name: str
+
+
 __all__ = [
     "Position",
     "MouseButton",
@@ -73,4 +119,9 @@ __all__ = [
     "DelayType",
     "KeyType",
     "ButtonType",
+    "ImageFormat",
+    "FrameData",
+    "ImageType",
+    "VideoFrame",
+    "FramebufferConfig",
 ]

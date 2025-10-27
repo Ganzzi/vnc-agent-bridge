@@ -29,7 +29,7 @@ Example:
 
 import socket
 import struct
-from typing import Optional
+from typing import Optional, List, Tuple
 
 from ..exceptions import (
     VNCConnectionError,
@@ -46,6 +46,14 @@ class VNCConnection:
     PROTOCOL_VERSION = b"RFB 003.008\n"
     POINTER_EVENT = 5
     KEY_EVENT = 4
+
+    # Framebuffer message types (v0.2.0)
+    FRAMEBUFFER_UPDATE_REQUEST = 3
+    SET_ENCODINGS = 2
+    FRAMEBUFFER_UPDATE = 0
+    SET_PIXEL_FORMAT = 0
+    CLIPBOARD_TEXT_CLIENT = 6
+    CLIPBOARD_TEXT_SERVER = 3
 
     def __init__(
         self,
@@ -160,6 +168,178 @@ class VNCConnection:
         down_flag = 1 if pressed else 0
         data = struct.pack("!BBHI", self.KEY_EVENT, down_flag, 0, keycode)
         self._send_raw(data)
+
+    def request_framebuffer_update(
+        self,
+        incremental: bool = True,
+        x: int = 0,
+        y: int = 0,
+        width: Optional[int] = None,
+        height: Optional[int] = None,
+    ) -> None:
+        """Request framebuffer update from server.
+
+        Args:
+            incremental: True for incremental update, False for full refresh
+            x: X coordinate of update region
+            y: Y coordinate of update region
+            width: Width of update region (None for full width)
+            height: Height of update region (None for full height)
+
+        Raises:
+            VNCStateError: If not connected
+            VNCConnectionError: If send fails
+        """
+        self._validate_connection()
+
+        # Use full screen dimensions if not specified
+        # In a full implementation, we'd get these from server init
+        # For now, use reasonable defaults that can be overridden
+        if width is None:
+            width = 1920  # Default width
+        if height is None:
+            height = 1080  # Default height
+
+        # Format: [msg_type=3][incremental][x][y][width][height] (big-endian)
+        incremental_flag = 1 if incremental else 0
+        data = struct.pack(
+            "!BBHHHH",
+            self.FRAMEBUFFER_UPDATE_REQUEST,
+            incremental_flag,
+            x,
+            y,
+            width,
+            height,
+        )
+        self._send_raw(data)
+
+    def read_framebuffer_update(self) -> List[Tuple[int, int, int, int, bytes]]:
+        """Read framebuffer update response from server.
+
+        Returns:
+            List of rectangles: [(x, y, width, height, pixel_data), ...]
+
+        Raises:
+            VNCStateError: If not connected
+            VNCConnectionError: If receive fails
+            VNCProtocolError: If message format is invalid
+        """
+        self._validate_connection()
+
+        # Read message type
+        msg_type = struct.unpack("!B", self._recv_exact(1))[0]
+        if msg_type != self.FRAMEBUFFER_UPDATE:
+            raise VNCProtocolError(f"Expected framebuffer update (0), got {msg_type}")
+
+        # Skip padding byte
+        self._recv_exact(1)
+
+        # Read number of rectangles
+        num_rectangles = struct.unpack("!H", self._recv_exact(2))[0]
+
+        rectangles = []
+        for _ in range(num_rectangles):
+            # Read rectangle header: x, y, width, height, encoding
+            rect_data = self._recv_exact(12)
+            x, y, width, height, encoding = struct.unpack("!HHHHi", rect_data)
+
+            # For now, only handle Raw encoding (0)
+            if encoding != 0:
+                raise VNCProtocolError(f"Unsupported encoding: {encoding}")
+
+            # Calculate pixel data size (assuming 32-bit RGBA)
+            pixel_data_size = width * height * 4
+            pixel_data = self._recv_exact(pixel_data_size)
+
+            rectangles.append((x, y, width, height, pixel_data))
+
+        return rectangles
+
+    def set_encodings(self, encodings: List[int]) -> None:
+        """Tell server which encodings we support.
+
+        Args:
+            encodings: List of encoding numbers we support
+
+        Raises:
+            VNCStateError: If not connected
+            VNCConnectionError: If send fails
+        """
+        self._validate_connection()
+
+        # Format: [msg_type=2][padding][num_encodings][encodings...] (big-endian)
+        num_encodings = len(encodings)
+        data = struct.pack("!BBH", self.SET_ENCODINGS, 0, num_encodings)
+
+        # Add each encoding as a 32-bit integer
+        for encoding in encodings:
+            data += struct.pack("!i", encoding)
+
+        self._send_raw(data)
+
+    def send_clipboard_text(self, text: str) -> None:
+        """Send clipboard text to server.
+
+        Args:
+            text: Text to send to remote clipboard
+
+        Raises:
+            VNCStateError: If not connected
+            VNCConnectionError: If send fails
+        """
+        self._validate_connection()
+
+        # Convert text to bytes (latin-1 encoding as per RFB spec)
+        text_bytes = text.encode("latin-1")
+        text_length = len(text_bytes)
+
+        # Format: [msg_type=6][padding][length][text_bytes] (big-endian)
+        data = struct.pack("!BBI", self.CLIPBOARD_TEXT_CLIENT, 0, text_length)
+        data += text_bytes
+
+        self._send_raw(data)
+
+    def receive_clipboard_text(self) -> Optional[str]:
+        """Receive clipboard text from server.
+
+        Returns:
+            Clipboard text if available, None if no clipboard message pending
+
+        Raises:
+            VNCStateError: If not connected
+            VNCConnectionError: If receive fails
+        """
+        self._validate_connection()
+
+        # This is a simplified implementation
+        # In a full implementation, we'd need to handle the server's message loop
+        # For now, this method can be called when we expect clipboard data
+
+        try:
+            # Try to read a clipboard message (non-blocking check)
+            # Read message type
+            msg_type = struct.unpack("!B", self._recv_exact(1))[0]
+
+            if msg_type != self.CLIPBOARD_TEXT_SERVER:
+                # Not a clipboard message, put it back (this is tricky with TCP)
+                # For now, return None if it's not clipboard data
+                return None
+
+            # Skip padding byte
+            self._recv_exact(1)
+
+            # Read text length
+            text_length = struct.unpack("!I", self._recv_exact(4))[0]
+
+            # Read text data
+            text_bytes = self._recv_exact(text_length)
+
+            # Decode as latin-1 (per RFB spec)
+            return text_bytes.decode("latin-1")
+
+        except (VNCConnectionError, VNCTimeoutError):
+            # No clipboard data available
+            return None
 
     def _validate_connection(self) -> None:
         """Verify connection is active.

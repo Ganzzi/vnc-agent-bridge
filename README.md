@@ -1,6 +1,5 @@
 # VNC Agent Bridge
 
-[![Tests](https://github.com/Ganzzi/vnc-agent-bridge/actions/workflows/tests.yml/badge.svg)](https://github.com/Ganzzi/vnc-agent-bridge/actions/workflows/tests.yml)
 [![Coverage](https://codecov.io/gh/Ganzzi/vnc-agent-bridge/branch/main/graph/badge.svg)](https://codecov.io/gh/Ganzzi/vnc-agent-bridge)
 [![PyPI](https://img.shields.io/pypi/v/vnc-agent-bridge)](https://pypi.org/project/vnc-agent-bridge/)
 [![Python](https://img.shields.io/pypi/pyversions/vnc-agent-bridge)](https://pypi.org/project/vnc-agent-bridge/)
@@ -12,6 +11,7 @@ VNC Agent Bridge provides high-level abstractions for AI agents to control mouse
 
 ## ✨ Features
 
+### v0.1.0 (Current Release)
 - **Mouse Control**: Click, move, drag, and position tracking
 - **Keyboard Input**: Type text, press keys, hotkeys, key combinations
 - **Scroll Control**: Scroll up/down at specific positions
@@ -20,7 +20,13 @@ VNC Agent Bridge provides high-level abstractions for AI agents to control mouse
 - **Context Manager**: Automatic connection management
 - **Zero Dependencies**: Uses only Python standard library
 - **Comprehensive Testing**: 85%+ code coverage with 130+ test cases
-- **Production Ready**: All quality checks passing (mypy, flake8, black)
+
+### v0.2.0 (Upcoming Stable Release)
+- **Screenshot Capture**: Save screen images in multiple formats
+- **Video Recording**: Record screen activity with configurable FPS
+- **Clipboard Management**: Get, set, and clear clipboard text
+- **Enhanced Performance**: Framebuffer optimization for capture features
+- **Optional Dependencies**: numpy and Pillow for advanced features
 
 ## 🚀 Installation
 
@@ -191,12 +197,11 @@ black vnc_agent_bridge tests
 - **Cross-platform**: Tests run on Linux, macOS, Windows
 
 ### Current Project Status
-- ✅ **Phase 1**: Project setup and architecture (Complete)
-- ✅ **Phase 2**: Core controllers implementation (Complete)
-- ✅ **Phase 3**: Testing & quality assurance (Complete)
-- ✅ **Phase 4**: Documentation & PyPI release (Complete)
-- ✅ **Phase 5**: Final Testing & Release (Complete)
-- 🚀 **Status**: Released on PyPI (v0.1.0)
+- ✅ **v0.1.0**: Core functionality released on PyPI
+- 🚧 **v0.2.0**: Planning complete, implementation in progress
+- 🎯 **v0.2.0 Features**: Screenshot capture, video recording, clipboard management
+- 📅 **v0.2.0 Timeline**: 10-14 days to stable release
+- 🚀 **Next Milestone**: Begin Phase 1 of v0.2.0 implementation
 
 ### Quality Metrics
 - **Test Coverage**: 85% (391 statements, 59 missed)

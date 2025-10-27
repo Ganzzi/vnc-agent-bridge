@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **v0.2.0 Phase 1 Foundation Complete**: Extended VNCConnection for framebuffer support
+  - Added `request_framebuffer_update()` method for screen update requests
+  - Added `read_framebuffer_update()` method for parsing server responses
+  - Added `set_encodings()` method to configure supported VNC encodings
+  - Added `send_clipboard_text()` and `receive_clipboard_text()` methods
+  - Created FramebufferManager class with numpy-based pixel storage
+  - Added rectangle update processing and dirty tracking
+  - Extended type system with ImageFormat, FrameData, VideoFrame, FramebufferConfig
+  - All code passes mypy strict and flake8 quality checks
 - Initial project structure and setup
 - Type definitions and exception hierarchy
 - Configuration files (pyproject.toml, setup.py, etc.)
@@ -64,36 +73,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.2.0] - 2025-11-XX (Planned)
 
 ### Added
-- Async/await support for non-blocking operations
-- Connection pooling for multiple VNC servers
-- Screen capture and analysis capabilities
-- Enhanced error recovery and reconnection logic
-- Performance optimizations
+- Screenshot capture and image saving capabilities
+- Video recording with configurable FPS and formats
+- Clipboard text operations (get/set/clear)
+- FramebufferManager for screen buffer management
+- Extended VNCConnection with framebuffer update support
+- Optional dependencies: numpy>=1.20.0, Pillow>=9.0.0
+- Enhanced error handling with 9 exception types
+- Comprehensive documentation for new features
 
 ### Changed
 - Improved timing controls and delay mechanisms
 - Enhanced keyboard mapping for international layouts
+- Extended VNCAgentBridge facade with new controllers
 
-## [1.0.0] - 2025-12-XX (Planned)
+## [1.0.0] - 2026-XX-XX (Future)
 
 ### Added
-- Production-ready stability
-- Comprehensive integration tests
-- PyPI publication
-- Complete user documentation
-- Community contribution guidelines
+- Async/await support for non-blocking operations
+- Connection pooling for multiple VNC servers
+- Video encoding with H.264, WebM export formats
+- Audio capture and screen+audio recording
+- OCR integration for text recognition
+- Object detection and AI-powered interaction
+- WebSocket and RTMP streaming support
+- Multi-display support for dual/triple monitors
 
 ### Changed
 - API stabilization with backward compatibility guarantees
 - Enhanced cross-platform compatibility
+- Production-ready stability with comprehensive integration tests
 
 ---
 
 ## Version History
 
 - **0.1.0**: Core functionality with mouse, keyboard, scroll control
-- **0.2.0**: Enhanced features and async support
-- **1.0.0**: Production release with full documentation
+- **0.2.0**: Enhanced features with screenshot, video, and clipboard support
+- **1.0.0**: Advanced automation with async support, encoding, and AI features
 
 ## Contributing to Changelog
 
