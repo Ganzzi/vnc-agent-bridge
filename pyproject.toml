@@ -37,12 +37,17 @@ Issues = "https://github.com/Ganzzi/vnc-agent-bridge/issues"
 Documentation = "https://github.com/Ganzzi/vnc-agent-bridge#readme"
 
 [project.optional-dependencies]
+capture = ["numpy>=1.20.0", "Pillow>=9.0.0"]
+video = ["numpy>=1.20.0", "Pillow>=9.0.0"]
+full = ["numpy>=1.20.0", "Pillow>=9.0.0"]
 dev = [
     "pytest>=7.0",
     "pytest-cov>=3.0",
     "mypy>=0.990",
     "flake8>=4.0",
     "black>=22.0",
+    "numpy>=1.20.0",
+    "Pillow>=9.0.0",
 ]
 docs = ["sphinx>=4.0", "sphinx-rtd-theme>=1.0"]
 
