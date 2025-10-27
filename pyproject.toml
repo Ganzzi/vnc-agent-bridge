@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vnc-agent-bridge"
-version = "0.1.0"
+version = "0.2.0"
 description = "Open-source Python package for AI agents to interact with VNC servers"
 readme = "README.md"
 license = { text = "MIT" }
