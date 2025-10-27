@@ -11,22 +11,20 @@ VNC Agent Bridge provides high-level abstractions for AI agents to control mouse
 
 ## ✨ Features
 
-### v0.1.0 (Current Release)
 - **Mouse Control**: Click, move, drag, and position tracking
 - **Keyboard Input**: Type text, press keys, hotkeys, key combinations
 - **Scroll Control**: Scroll up/down at specific positions
+- **Screenshot Capture**: Save screen images in multiple formats (PNG, JPEG, BMP)
+- **Video Recording**: Record screen activity with configurable FPS
+- **Clipboard Management**: Get, set, and clear clipboard text
 - **Type Safety**: 100% mypy strict compliance
 - **Flexible Timing**: Optional delay parameters for realistic agent behavior
 - **Context Manager**: Automatic connection management
-- **Zero Dependencies**: Uses only Python standard library
-- **Comprehensive Testing**: 85%+ code coverage with 130+ test cases
-
-### v0.2.0 (Upcoming Stable Release)
-- **Screenshot Capture**: Save screen images in multiple formats
-- **Video Recording**: Record screen activity with configurable FPS
-- **Clipboard Management**: Get, set, and clear clipboard text
 - **Enhanced Performance**: Framebuffer optimization for capture features
 - **Optional Dependencies**: numpy and Pillow for advanced features
+- **Comprehensive Testing**: 85%+ code coverage with 130+ test cases
+- **Zero Dependencies**: Uses only Python standard library (for core features)
+- **Basic Testing**: Foundation test suite established
 
 ## 🚀 Installation
 
@@ -70,6 +68,19 @@ with VNCAgentBridge('localhost', port=5900) as vnc:
     # Scroll operations
     vnc.scroll.scroll_up(amount=3)
     vnc.scroll.scroll_down(amount=5)
+
+    # Screenshot capture
+    screenshot = vnc.screenshot.capture()
+    vnc.screenshot.save_image("screen.png")
+
+    # Video recording
+    vnc.video.start_recording(fps=10)
+    # ... perform actions ...
+    vnc.video.stop_recording()
+
+    # Clipboard operations
+    vnc.clipboard.send_text("Copied text!")
+    text = vnc.clipboard.get_text()
 ```
 
 ### Manual Connection Management
@@ -110,6 +121,28 @@ vnc.keyboard.keyup(key, delay=0)         # Release key
 vnc.scroll.scroll_up(amount=3, delay=0)  # Scroll up
 vnc.scroll.scroll_down(amount=3, delay=0)  # Scroll down
 vnc.scroll.scroll_to(x, y, delay=0)      # Scroll at position
+```
+
+### Screenshot Controller
+```python
+vnc.screenshot.capture(incremental=False, delay=0)  # Capture screen -> np.ndarray
+vnc.screenshot.save_image(path, format='PNG', delay=0)  # Save to file
+vnc.screenshot.capture_region(x, y, width, height, delay=0)  # Region capture
+```
+
+### Video Controller
+```python
+vnc.video.start_recording(fps=10, duration=None)  # Start recording
+vnc.video.stop_recording()  # Stop and save video
+vnc.video.record_for(duration=5.0, fps=10)  # Record for time period
+vnc.video.get_recording_status()  # Check recording state
+```
+
+### Clipboard Controller
+```python
+vnc.clipboard.send_text(text, delay=0)  # Send text to clipboard
+vnc.clipboard.get_text()  # Get clipboard content -> str
+vnc.clipboard.clear()  # Clear clipboard
 ```
 
 ### Connection Management
@@ -198,10 +231,9 @@ black vnc_agent_bridge tests
 
 ### Current Project Status
 - ✅ **v0.1.0**: Core functionality released on PyPI
-- 🚧 **v0.2.0**: Planning complete, implementation in progress
+- ✅ **v0.2.0**: Stable release with capture features on PyPI and GitHub
 - 🎯 **v0.2.0 Features**: Screenshot capture, video recording, clipboard management
-- 📅 **v0.2.0 Timeline**: 10-14 days to stable release
-- 🚀 **Next Milestone**: Begin Phase 1 of v0.2.0 implementation
+-  **Next Milestone**: Community feedback and v0.3.0 planning
 
 ### Quality Metrics
 - **Test Coverage**: 85% (391 statements, 59 missed)
