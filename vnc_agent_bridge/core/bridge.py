@@ -22,12 +22,18 @@ Example:
             vnc.disconnect()
 """
 
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 from .connection import VNCConnection
 from .mouse import MouseController
 from .keyboard import KeyboardController
 from .scroll import ScrollController
+from vnc_agent_bridge.exceptions import VNCStateError
+
+if TYPE_CHECKING:
+    from .framebuffer import FramebufferManager
+    from .screenshot import ScreenshotController
+    from .video import VideoRecorder
 
 
 class VNCAgentBridge:
@@ -58,6 +64,9 @@ class VNCAgentBridge:
         self._mouse: Optional[MouseController] = None
         self._keyboard: Optional[KeyboardController] = None
         self._scroll: Optional[ScrollController] = None
+        self._framebuffer: Optional["FramebufferManager"] = None
+        self._screenshot: Optional["ScreenshotController"] = None
+        self._video: Optional["VideoRecorder"] = None
 
     def connect(self) -> None:
         """Connect to VNC server and initialize controllers."""
@@ -68,6 +77,37 @@ class VNCAgentBridge:
         self._keyboard = KeyboardController(self._connection)
         self._scroll = ScrollController(self._connection)
 
+        # Initialize framebuffer-dependent components if dependencies available
+        try:
+            from .framebuffer import FramebufferManager
+            from .screenshot import ScreenshotController
+            from .video import VideoRecorder
+            from ..types.common import FramebufferConfig
+
+            # Create framebuffer config from connection
+            config = FramebufferConfig(
+                width=1920,  # Default, will be updated by VNC server
+                height=1080,  # Default, will be updated by VNC server
+                pixel_format=b"",
+                name="VNC Screen",
+            )
+
+            # Create framebuffer manager
+            self._framebuffer = FramebufferManager(self._connection, config)
+
+            # Create screenshot controller
+            self._screenshot = ScreenshotController(self._connection, self._framebuffer)
+
+            # Create video recorder
+            self._video = VideoRecorder(
+                self._connection, self._framebuffer, self._screenshot
+            )
+
+        except (ImportError, TypeError, AttributeError):
+            # Optional dependencies not available or framebuffer not supported
+            # Video features will be unavailable but basic input control works
+            pass
+
     def disconnect(self) -> None:
         """Disconnect from VNC server."""
         self._connection.disconnect()
@@ -76,6 +116,9 @@ class VNCAgentBridge:
         self._mouse = None
         self._keyboard = None
         self._scroll = None
+        self._framebuffer = None
+        self._screenshot = None
+        self._video = None
 
     @property
     def is_connected(self) -> bool:
@@ -123,6 +166,51 @@ class VNCAgentBridge:
         if self._scroll is None:
             raise RuntimeError("Not connected. Call connect() first.")
         return self._scroll
+
+    @property
+    def screenshot(self) -> "ScreenshotController":
+        """Access screenshot controller.
+
+        Returns:
+            ScreenshotController instance
+
+        Raises:
+            VNCStateError: If screenshot feature not available (dependencies missing)
+            RuntimeError: If not connected
+        """
+        if self._screenshot is None:
+            raise VNCStateError(
+                "Screenshot feature not available. "
+                "Install with: pip install vnc-agent-bridge[capture]"
+            )
+        return self._screenshot
+
+    @property
+    def video(self) -> "VideoRecorder":
+        """Access video recorder.
+
+        Returns:
+            VideoRecorder instance
+
+        Raises:
+            VNCStateError: If video feature not available (dependencies missing)
+            RuntimeError: If not connected
+        """
+        if self._video is None:
+            raise VNCStateError(
+                "Video feature not available. "
+                "Install with: pip install vnc-agent-bridge[video]"
+            )
+        return self._video
+
+    @property
+    def framebuffer(self) -> Optional["FramebufferManager"]:
+        """Access framebuffer manager (if available).
+
+        Returns:
+            FramebufferManager instance or None if not available
+        """
+        return self._framebuffer
 
     def __enter__(self) -> "VNCAgentBridge":
         """Context manager entry - connect automatically."""
