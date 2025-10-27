@@ -1,4 +1,27 @@
-# Common type definitions for VNC Agent Bridge
+"""Common type definitions for VNC Agent Bridge.
+
+This module defines type aliases and enumerations used throughout the VNC
+Agent Bridge library. These types provide semantic meaning and improve code
+clarity compared to using raw integers.
+
+Type Aliases:
+    - Position: (x, y) coordinate tuple for screen positions
+
+Enumerations:
+    - MouseButton: VNC mouse button constants (LEFT, MIDDLE, RIGHT)
+    - ScrollDirection: Scroll direction (UP, DOWN)
+    - KeyAction: Key event action type (PRESS, RELEASE)
+    - DelayType: Type alias for timing parameters
+
+Example:
+    Using position type:
+        from types.common import Position
+        pos: Position = (100, 200)  # x=100, y=200
+
+    Using button enumeration:
+        from types.common import MouseButton
+        button = MouseButton.LEFT
+"""
 
 from enum import IntEnum
 from typing import Tuple, Union

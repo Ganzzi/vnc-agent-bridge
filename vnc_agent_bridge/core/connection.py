@@ -1,4 +1,31 @@
-# VNC Connection Protocol Implementation
+"""VNC Connection protocol implementation.
+
+This module implements low-level VNC (Remote Framebuffer) protocol communication
+for interacting with VNC servers. It handles connection management, protocol
+handshaking, and sending VNC events (pointer and key events).
+
+The implementation uses the RFB 3.8 protocol specification and communicates
+over TCP sockets. It abstracts the binary protocol details and provides
+higher-level methods for sending input events.
+
+Protocol Overview:
+    - Handshake: Protocol version negotiation
+    - Connection: TCP socket to VNC server
+    - Events: Pointer (mouse) and Key events are the primary messages
+    - Data Format: Big-endian binary format with specific message structures
+
+Message Types:
+    - Pointer Event (Type 5): Mouse position and button state
+    - Key Event (Type 4): Keyboard input with key code and press/release state
+
+Example:
+    Low-level protocol usage:
+        conn = VNCConnection('localhost', port=5900)
+        conn.connect()
+        conn.send_pointer_event(100, 100, 1)  # Click at (100, 100)
+        conn.send_key_event(0xFF0D, True)     # Press Return key
+        conn.disconnect()
+"""
 
 import socket
 import struct

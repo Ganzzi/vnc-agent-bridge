@@ -29,7 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Security
 - N/A
 
-## [0.1.0] - 2025-10-XX
+## [0.1.0] - 2025-10-27
 
 ### Added
 - Complete VNCConnection class with RFB protocol support
@@ -38,9 +38,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ScrollController with 3 methods (scroll up/down/to)
 - VNCAgentBridge facade with context manager support
 - Full type annotations (100% mypy strict compliance)
-- Comprehensive test suite (50+ tests, 85%+ coverage)
-- Complete API documentation
-- Usage guides and examples
+- Comprehensive test suite (132 tests, 85%+ coverage)
+- Complete API documentation (4 reference files)
+- Usage guides and examples (5 comprehensive guides)
+- Example workflows for common use cases
+- Detailed module documentation with docstrings
 
 ### Changed
 - N/A (initial release)

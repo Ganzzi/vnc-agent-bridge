@@ -1,4 +1,26 @@
-# Main Facade for VNC Agent Bridge
+"""Main facade for VNC Agent Bridge.
+
+This module provides the primary entry point for interacting with VNC servers.
+The VNCAgentBridge class acts as a facade, managing the connection and providing
+access to specialized controllers for mouse, keyboard, and scroll operations.
+
+The class supports both context manager (recommended) and manual connection
+management patterns.
+
+Example:
+    Using context manager (recommended):
+        with VNCAgentBridge('localhost', port=5900) as vnc:
+            vnc.mouse.left_click(100, 100)
+            vnc.keyboard.type_text("text")
+
+    Using manual connection management:
+        vnc = VNCAgentBridge('localhost')
+        try:
+            vnc.connect()
+            vnc.mouse.left_click(100, 100)
+        finally:
+            vnc.disconnect()
+"""
 
 from typing import Any, Optional
 

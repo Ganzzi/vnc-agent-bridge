@@ -1,4 +1,36 @@
-# Keyboard Controller for VNC Agent Bridge
+"""Keyboard controller for VNC Agent Bridge.
+
+This module provides the KeyboardController class for controlling keyboard
+input on a remote VNC server. It supports typing text, pressing individual keys,
+key combinations (hotkeys), and holding/releasing keys.
+
+The controller uses X11 KEYSYM values for key mapping, ensuring compatibility
+with most VNC servers. Key names (strings) are mapped to X11 key codes, and
+individual characters are supported through ASCII/Unicode values.
+
+Supported key types:
+    - Special keys: 'return', 'tab', 'escape', 'backspace', 'delete', 'space'
+    - Function keys: 'f1' through 'f12'
+    - Arrow keys: 'up', 'down', 'left', 'right'
+    - Modifiers: 'shift', 'ctrl', 'alt', 'cmd'
+    - Characters: Any single character ('a', 'A', '1', '!', etc.)
+
+Example:
+    Text input:
+        keyboard = KeyboardController(connection)
+        keyboard.type_text("Hello World")
+        keyboard.press_key("return")
+
+    Hotkey combinations:
+        keyboard.hotkey("ctrl", "a")  # Select all
+        keyboard.hotkey("ctrl", "c")  # Copy
+        keyboard.hotkey("ctrl", "v")  # Paste
+
+    Key events:
+        keyboard.keydown("shift")
+        keyboard.press_key("right")
+        keyboard.keyup("shift")
+"""
 
 import time
 from typing import Union

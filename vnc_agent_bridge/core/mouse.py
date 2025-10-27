@@ -1,4 +1,29 @@
-# Mouse Controller for VNC Agent Bridge
+"""Mouse controller for VNC Agent Bridge.
+
+This module provides the MouseController class for controlling mouse/pointer
+operations on a remote VNC server. It supports various click types, movement,
+dragging, and position tracking.
+
+All methods support an optional delay parameter for timing control, enabling
+realistic human-like interaction patterns or fast automated sequences.
+
+Button constants:
+    - LEFT (0): Left mouse button (primary click)
+    - MIDDLE (1): Middle mouse button
+    - RIGHT (2): Right mouse button (context menu)
+
+Example:
+    Basic mouse operations:
+        mouse = MouseController(connection)
+        mouse.move_to(100, 100)
+        mouse.left_click()
+        mouse.double_click(200, 200)
+        mouse.drag_to(300, 300, duration=1.0)
+
+    With timing control:
+        mouse.left_click(100, 100, delay=0.5)  # 500ms delay
+        position = mouse.get_position()
+"""
 
 import time
 from typing import Optional

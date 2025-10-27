@@ -1,4 +1,26 @@
-# Scroll Controller for VNC Agent Bridge
+"""Scroll controller for VNC Agent Bridge.
+
+This module provides the ScrollController class for controlling mouse wheel
+scrolling operations on a remote VNC server. It supports scrolling up, down,
+and at specific screen positions.
+
+The scroll operations are implemented using VNC button events (buttons 3 and 4
+are typically mapped to scroll down and scroll up respectively in VNC).
+
+All methods support an optional delay parameter for timing control.
+
+Example:
+    Basic scrolling:
+        scroll = ScrollController(connection)
+        scroll.scroll_up(amount=5)
+        scroll.scroll_down(amount=3)
+
+    Scroll at specific position:
+        scroll.scroll_to(x=400, y=300)
+
+    With timing control:
+        scroll.scroll_down(amount=3, delay=0.5)
+"""
 
 import time
 
