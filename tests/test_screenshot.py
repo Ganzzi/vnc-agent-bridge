@@ -13,12 +13,10 @@ import pytest
 import numpy as np
 import tempfile
 import os
-from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock, call
-from io import BytesIO
+from unittest.mock import Mock, patch
 
 from vnc_agent_bridge.core.screenshot import ScreenshotController
-from vnc_agent_bridge.types.common import ImageFormat, FramebufferConfig
+from vnc_agent_bridge.types.common import ImageFormat
 from vnc_agent_bridge.exceptions import VNCInputError
 
 

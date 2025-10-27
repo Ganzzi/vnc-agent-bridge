@@ -5,7 +5,7 @@ from unittest.mock import Mock, patch
 
 from vnc_agent_bridge.core.clipboard import ClipboardController
 from vnc_agent_bridge.core.connection import VNCConnection
-from vnc_agent_bridge.exceptions import VNCInputError, VNCStateError
+from vnc_agent_bridge.exceptions import VNCInputError
 
 
 class TestClipboardController:

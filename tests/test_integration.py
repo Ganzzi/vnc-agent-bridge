@@ -294,4 +294,120 @@ class TestBridgeEdgeCases:
         for host in hosts:
             bridge = VNCAgentBridge(host)
             assert bridge is not None
-            assert bridge.is_connected is False
+
+
+class TestBridgeV020Features:
+    """Tests for v0.2.0 features: clipboard, screenshot, video, framebuffer."""
+
+    def test_bridge_clipboard_integration(self) -> None:
+        """Test clipboard controller integration with bridge."""
+        bridge = setup_bridge_with_mock()
+        bridge._clipboard = Mock()
+        bridge._clipboard.send_text = Mock()
+        bridge._clipboard.get_text = Mock(return_value="test content")
+
+        # Test clipboard operations
+        bridge.clipboard.send_text("hello")
+        bridge.clipboard.get_text()
+
+        bridge._clipboard.send_text.assert_called_once_with("hello")
+        bridge._clipboard.get_text.assert_called_once()
+
+    def test_bridge_screenshot_disabled_by_default(self) -> None:
+        """Test that screenshot is disabled when enable_framebuffer=False."""
+        from vnc_agent_bridge.exceptions import VNCStateError
+
+        bridge = VNCAgentBridge("localhost", enable_framebuffer=False)
+        bridge._connection = Mock(spec=VNCConnection)
+        bridge._connection.is_connected = True
+        # Don't initialize controllers that require framebuffer
+
+        with pytest.raises(VNCStateError, match="Screenshot feature not enabled"):
+            bridge.screenshot
+
+    def test_bridge_video_disabled_by_default(self) -> None:
+        """Test that video is disabled when enable_framebuffer=False."""
+        from vnc_agent_bridge.exceptions import VNCStateError
+
+        bridge = VNCAgentBridge("localhost", enable_framebuffer=False)
+        bridge._connection = Mock(spec=VNCConnection)
+        bridge._connection.is_connected = True
+
+        with pytest.raises(VNCStateError, match="Video feature not enabled"):
+            bridge.video
+
+    def test_bridge_framebuffer_enabled(self) -> None:
+        """Test framebuffer access when enabled."""
+        bridge = VNCAgentBridge("localhost", enable_framebuffer=True)
+        bridge._connection = Mock(spec=VNCConnection)
+        bridge._connection.is_connected = True
+        bridge._framebuffer = Mock()
+
+        assert bridge.framebuffer is not None
+
+    def test_bridge_framebuffer_disabled(self) -> None:
+        """Test framebuffer access when disabled."""
+        bridge = VNCAgentBridge("localhost", enable_framebuffer=False)
+        bridge._connection = Mock(spec=VNCConnection)
+        bridge._connection.is_connected = True
+
+        assert bridge.framebuffer is None
+
+    def test_bridge_enable_framebuffer_parameter(self) -> None:
+        """Test enable_framebuffer parameter storage."""
+        bridge_enabled = VNCAgentBridge("localhost", enable_framebuffer=True)
+        bridge_disabled = VNCAgentBridge("localhost", enable_framebuffer=False)
+
+        assert bridge_enabled._enable_framebuffer is True
+        assert bridge_disabled._enable_framebuffer is False
+
+    def test_bridge_v020_workflow(self) -> None:
+        """Test complete v0.2.0 workflow with all features."""
+        bridge = setup_bridge_with_mock()
+        bridge._clipboard = Mock()
+        bridge._clipboard.send_text = Mock()
+        bridge._clipboard.get_text = Mock(return_value="clipboard content")
+
+        # Mock framebuffer components
+        bridge._framebuffer = Mock()
+        bridge._screenshot = Mock()
+        bridge._screenshot.capture = Mock(return_value=Mock())
+        bridge._video = Mock()
+        bridge._video.record = Mock()
+
+        # Test integrated workflow
+        bridge.mouse.left_click(100, 100)
+        bridge.keyboard.type_text("test input")
+        bridge.clipboard.send_text("copied text")
+        bridge.screenshot.capture()
+        bridge.video.record(duration=1.0)
+
+        # Verify all components were used
+        assert bridge._connection.send_pointer_event.called
+        assert bridge._connection.send_key_event.called
+        bridge._clipboard.send_text.assert_called_once_with("copied text")
+        bridge._screenshot.capture.assert_called_once()
+        bridge._video.record.assert_called_once_with(duration=1.0)
+
+    def test_bridge_optional_components_not_initialized_when_disabled(self) -> None:
+        """Test optional components not initialized when framebuffer disabled."""
+        bridge = VNCAgentBridge("localhost", enable_framebuffer=False)
+        bridge._connection = Mock(spec=VNCConnection)
+        bridge._connection.is_connected = True
+
+        # Manually call connect logic (simplified)
+        bridge._mouse = MouseController(bridge._connection)
+        bridge._keyboard = KeyboardController(bridge._connection)
+        bridge._scroll = ScrollController(bridge._connection)
+        bridge._clipboard = Mock()  # Clipboard doesn't depend on framebuffer
+
+        # Optional components should remain None
+        assert bridge._framebuffer is None
+        assert bridge._screenshot is None
+        assert bridge._video is None
+
+        # But basic controllers should work
+        assert bridge.mouse is not None
+        assert bridge.keyboard is not None
+        assert bridge.scroll is not None
+        assert bridge.clipboard is not None

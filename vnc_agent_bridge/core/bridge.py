@@ -51,6 +51,7 @@ class VNCAgentBridge:
         username: Optional[str] = None,
         password: Optional[str] = None,
         timeout: float = 10.0,
+        enable_framebuffer: bool = True,
     ) -> None:
         """Initialize VNC bridge.
 
@@ -60,8 +61,10 @@ class VNCAgentBridge:
             username: Optional username for authentication
             password: Optional password for authentication
             timeout: Connection timeout in seconds
+            enable_framebuffer: Enable framebuffer features (screenshot, video)
         """
         self._connection = VNCConnection(host, port, username, password, timeout)
+        self._enable_framebuffer = enable_framebuffer
         self._mouse: Optional[MouseController] = None
         self._keyboard: Optional[KeyboardController] = None
         self._scroll: Optional[ScrollController] = None
@@ -80,36 +83,39 @@ class VNCAgentBridge:
         self._scroll = ScrollController(self._connection)
         self._clipboard = ClipboardController(self._connection)
 
-        # Initialize framebuffer-dependent components if dependencies available
-        try:
-            from .framebuffer import FramebufferManager
-            from .screenshot import ScreenshotController
-            from .video import VideoRecorder
-            from ..types.common import FramebufferConfig
+        # Initialize framebuffer components if enabled and available
+        if self._enable_framebuffer:
+            try:
+                from .framebuffer import FramebufferManager
+                from .screenshot import ScreenshotController
+                from .video import VideoRecorder
+                from ..types.common import FramebufferConfig
 
-            # Create framebuffer config from connection
-            config = FramebufferConfig(
-                width=1920,  # Default, will be updated by VNC server
-                height=1080,  # Default, will be updated by VNC server
-                pixel_format=b"",
-                name="VNC Screen",
-            )
+                # Create framebuffer config from connection
+                config = FramebufferConfig(
+                    width=1920,  # Default, will be updated by VNC server
+                    height=1080,  # Default, will be updated by VNC server
+                    pixel_format=b"",
+                    name="VNC Screen",
+                )
 
-            # Create framebuffer manager
-            self._framebuffer = FramebufferManager(self._connection, config)
+                # Create framebuffer manager
+                self._framebuffer = FramebufferManager(self._connection, config)
 
-            # Create screenshot controller
-            self._screenshot = ScreenshotController(self._connection, self._framebuffer)
+                # Create screenshot controller
+                self._screenshot = ScreenshotController(
+                    self._connection, self._framebuffer
+                )
 
-            # Create video recorder
-            self._video = VideoRecorder(
-                self._connection, self._framebuffer, self._screenshot
-            )
+                # Create video recorder
+                self._video = VideoRecorder(
+                    self._connection, self._framebuffer, self._screenshot
+                )
 
-        except (ImportError, TypeError, AttributeError):
-            # Optional dependencies not available or framebuffer not supported
-            # Video features will be unavailable but basic input control works
-            pass
+            except (ImportError, TypeError, AttributeError):
+                # Optional dependencies not available or framebuffer not supported
+                # Video features will be unavailable but basic input control works
+                pass
 
     def disconnect(self) -> None:
         """Disconnect from VNC server."""
@@ -193,14 +199,20 @@ class VNCAgentBridge:
             ScreenshotController instance
 
         Raises:
-            VNCStateError: If screenshot feature not available (dependencies missing)
+            VNCStateError: If screenshot feature unavailable (disabled or missing deps)
             RuntimeError: If not connected
         """
         if self._screenshot is None:
-            raise VNCStateError(
-                "Screenshot feature not available. "
-                "Install with: pip install vnc-agent-bridge[capture]"
-            )
+            if not self._enable_framebuffer:
+                raise VNCStateError(
+                    "Screenshot feature not enabled. "
+                    "Set enable_framebuffer=True when initializing VNCAgentBridge"
+                )
+            else:
+                raise VNCStateError(
+                    "Screenshot feature not available. "
+                    "Install with: pip install vnc-agent-bridge[capture]"
+                )
         return self._screenshot
 
     @property
@@ -211,14 +223,20 @@ class VNCAgentBridge:
             VideoRecorder instance
 
         Raises:
-            VNCStateError: If video feature not available (dependencies missing)
+            VNCStateError: If video feature unavailable (disabled or missing deps)
             RuntimeError: If not connected
         """
         if self._video is None:
-            raise VNCStateError(
-                "Video feature not available. "
-                "Install with: pip install vnc-agent-bridge[video]"
-            )
+            if not self._enable_framebuffer:
+                raise VNCStateError(
+                    "Video feature not enabled. "
+                    "Set enable_framebuffer=True when initializing VNCAgentBridge"
+                )
+            else:
+                raise VNCStateError(
+                    "Video feature not available. "
+                    "Install with: pip install vnc-agent-bridge[video]"
+                )
         return self._video
 
     @property
