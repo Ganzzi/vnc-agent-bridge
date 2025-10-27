@@ -3,12 +3,23 @@
 
 __version__ = "0.1.0"
 
-# Import main classes and exceptions here when implemented
-# from .core.bridge import VNCAgentBridge
-# from .exceptions import VNCException, VNCConnectionError
+# Import main classes and exceptions
+from .core.bridge import VNCAgentBridge
+from .exceptions import (
+    VNCException,
+    VNCConnectionError,
+    VNCTimeoutError,
+    VNCInputError,
+    VNCStateError,
+    VNCProtocolError,
+)
 
 __all__ = [
-    # "VNCAgentBridge",
-    # "VNCException",
-    # "VNCConnectionError",
+    "VNCAgentBridge",
+    "VNCException",
+    "VNCConnectionError",
+    "VNCTimeoutError",
+    "VNCInputError",
+    "VNCStateError",
+    "VNCProtocolError",
 ]
