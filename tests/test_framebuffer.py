@@ -9,7 +9,7 @@ import pytest
 import numpy as np
 
 from vnc_agent_bridge.core.framebuffer import FramebufferManager
-from vnc_agent_bridge.core.connection import VNCConnection
+from vnc_agent_bridge.core.connection_tcp import TCPVNCConnection
 from vnc_agent_bridge.types.common import FramebufferConfig
 
 
@@ -18,7 +18,7 @@ class TestFramebufferManagerInitialization:
 
     def test_init_basic(self) -> None:
         """Test basic initialization."""
-        mock_conn = Mock(spec=VNCConnection)
+        mock_conn = Mock(spec=TCPVNCConnection)
         config = FramebufferConfig(
             width=800, height=600, pixel_format=b"RGBA", name="test"
         )
@@ -32,7 +32,7 @@ class TestFramebufferManagerInitialization:
 
     def test_init_with_different_dimensions(self) -> None:
         """Test initialization with various dimensions."""
-        mock_conn = Mock(spec=VNCConnection)
+        mock_conn = Mock(spec=TCPVNCConnection)
 
         for width, height in [(640, 480), (1024, 768), (1920, 1080), (3840, 2160)]:
             config = FramebufferConfig(
@@ -48,7 +48,7 @@ class TestFramebufferBufferInitialization:
 
     def test_initialize_buffer(self) -> None:
         """Test buffer initialization creates correct RGBA array."""
-        mock_conn = Mock(spec=VNCConnection)
+        mock_conn = Mock(spec=TCPVNCConnection)
         config = FramebufferConfig(
             width=800, height=600, pixel_format=b"RGBA", name="test"
         )
@@ -64,7 +64,7 @@ class TestFramebufferBufferInitialization:
 
     def test_initialize_buffer_zeros(self) -> None:
         """Test that buffer is initialized with zeros (black)."""
-        mock_conn = Mock(spec=VNCConnection)
+        mock_conn = Mock(spec=TCPVNCConnection)
         config = FramebufferConfig(
             width=100, height=100, pixel_format=b"RGBA", name="test"
         )
@@ -77,7 +77,7 @@ class TestFramebufferBufferInitialization:
 
     def test_initialize_buffer_multiple_times(self) -> None:
         """Test that reinitializing buffer works correctly."""
-        mock_conn = Mock(spec=VNCConnection)
+        mock_conn = Mock(spec=TCPVNCConnection)
         config = FramebufferConfig(
             width=800, height=600, pixel_format=b"RGBA", name="test"
         )
@@ -102,7 +102,7 @@ class TestFramebufferProperties:
 
     def test_width_property(self) -> None:
         """Test width property returns correct value."""
-        mock_conn = Mock(spec=VNCConnection)
+        mock_conn = Mock(spec=TCPVNCConnection)
         config = FramebufferConfig(
             width=1920, height=1080, pixel_format=b"RGBA", name="test"
         )
@@ -112,7 +112,7 @@ class TestFramebufferProperties:
 
     def test_height_property(self) -> None:
         """Test height property returns correct value."""
-        mock_conn = Mock(spec=VNCConnection)
+        mock_conn = Mock(spec=TCPVNCConnection)
         config = FramebufferConfig(
             width=1920, height=1080, pixel_format=b"RGBA", name="test"
         )
@@ -122,7 +122,7 @@ class TestFramebufferProperties:
 
     def test_is_dirty_property(self) -> None:
         """Test is_dirty property returns correct value."""
-        mock_conn = Mock(spec=VNCConnection)
+        mock_conn = Mock(spec=TCPVNCConnection)
         config = FramebufferConfig(
             width=800, height=600, pixel_format=b"RGBA", name="test"
         )
@@ -139,7 +139,7 @@ class TestFramebufferGetBuffer:
 
     def test_get_buffer_before_init(self) -> None:
         """Test get_buffer before initialization raises error."""
-        mock_conn = Mock(spec=VNCConnection)
+        mock_conn = Mock(spec=TCPVNCConnection)
         config = FramebufferConfig(
             width=800, height=600, pixel_format=b"RGBA", name="test"
         )
@@ -150,7 +150,7 @@ class TestFramebufferGetBuffer:
 
     def test_get_buffer_after_init(self) -> None:
         """Test get_buffer after initialization returns array."""
-        mock_conn = Mock(spec=VNCConnection)
+        mock_conn = Mock(spec=TCPVNCConnection)
         config = FramebufferConfig(
             width=800, height=600, pixel_format=b"RGBA", name="test"
         )
@@ -165,7 +165,7 @@ class TestFramebufferGetBuffer:
 
     def test_get_buffer_returns_same_object(self) -> None:
         """Test get_buffer returns copy on multiple calls."""
-        mock_conn = Mock(spec=VNCConnection)
+        mock_conn = Mock(spec=TCPVNCConnection)
         config = FramebufferConfig(
             width=800, height=600, pixel_format=b"RGBA", name="test"
         )
@@ -186,7 +186,7 @@ class TestFramebufferGetRegion:
 
     def test_get_region_full_screen(self) -> None:
         """Test getting full screen region."""
-        mock_conn = Mock(spec=VNCConnection)
+        mock_conn = Mock(spec=TCPVNCConnection)
         config = FramebufferConfig(
             width=800, height=600, pixel_format=b"RGBA", name="test"
         )
@@ -200,7 +200,7 @@ class TestFramebufferGetRegion:
 
     def test_get_region_partial(self) -> None:
         """Test getting partial screen region."""
-        mock_conn = Mock(spec=VNCConnection)
+        mock_conn = Mock(spec=TCPVNCConnection)
         config = FramebufferConfig(
             width=800, height=600, pixel_format=b"RGBA", name="test"
         )
@@ -214,7 +214,7 @@ class TestFramebufferGetRegion:
 
     def test_get_region_with_offset(self) -> None:
         """Test getting region with offset."""
-        mock_conn = Mock(spec=VNCConnection)
+        mock_conn = Mock(spec=TCPVNCConnection)
         config = FramebufferConfig(
             width=800, height=600, pixel_format=b"RGBA", name="test"
         )
@@ -233,7 +233,7 @@ class TestFramebufferGetRegion:
 
     def test_get_region_edge_cases(self) -> None:
         """Test get_region with edge case dimensions."""
-        mock_conn = Mock(spec=VNCConnection)
+        mock_conn = Mock(spec=TCPVNCConnection)
         config = FramebufferConfig(
             width=800, height=600, pixel_format=b"RGBA", name="test"
         )
@@ -258,7 +258,7 @@ class TestFramebufferUpdateRectangle:
 
     def test_update_rectangle_basic(self) -> None:
         """Test updating a rectangle in framebuffer."""
-        mock_conn = Mock(spec=VNCConnection)
+        mock_conn = Mock(spec=TCPVNCConnection)
         config = FramebufferConfig(
             width=800, height=600, pixel_format=b"RGBA", name="test"
         )
@@ -277,7 +277,7 @@ class TestFramebufferUpdateRectangle:
 
     def test_update_rectangle_sets_dirty(self) -> None:
         """Test that process_update sets dirty flag."""
-        mock_conn = Mock(spec=VNCConnection)
+        mock_conn = Mock(spec=TCPVNCConnection)
         config = FramebufferConfig(
             width=800, height=600, pixel_format=b"RGBA", name="test"
         )
@@ -294,7 +294,7 @@ class TestFramebufferUpdateRectangle:
 
     def test_update_rectangle_multiple_regions(self) -> None:
         """Test updating multiple rectangles."""
-        mock_conn = Mock(spec=VNCConnection)
+        mock_conn = Mock(spec=TCPVNCConnection)
         config = FramebufferConfig(
             width=800, height=600, pixel_format=b"RGBA", name="test"
         )
@@ -322,7 +322,7 @@ class TestFramebufferReset:
 
     def test_reset_clears_dirty_flag(self) -> None:
         """Test that reset clears dirty flag."""
-        mock_conn = Mock(spec=VNCConnection)
+        mock_conn = Mock(spec=TCPVNCConnection)
         config = FramebufferConfig(
             width=800, height=600, pixel_format=b"RGBA", name="test"
         )
@@ -336,7 +336,7 @@ class TestFramebufferReset:
 
     def test_reset_preserves_buffer(self) -> None:
         """Test that reset clears buffer."""
-        mock_conn = Mock(spec=VNCConnection)
+        mock_conn = Mock(spec=TCPVNCConnection)
         config = FramebufferConfig(
             width=800, height=600, pixel_format=b"RGBA", name="test"
         )
@@ -357,7 +357,7 @@ class TestFramebufferRequestUpdate:
 
     def test_request_update_default_params(self) -> None:
         """Test request_update with default parameters."""
-        mock_conn = Mock(spec=VNCConnection)
+        mock_conn = Mock(spec=TCPVNCConnection)
         mock_conn.request_framebuffer_update = Mock()
 
         config = FramebufferConfig(
@@ -371,7 +371,7 @@ class TestFramebufferRequestUpdate:
 
     def test_request_update_with_params(self) -> None:
         """Test request_update with specific parameters."""
-        mock_conn = Mock(spec=VNCConnection)
+        mock_conn = Mock(spec=TCPVNCConnection)
         mock_conn.request_framebuffer_update = Mock()
 
         config = FramebufferConfig(
@@ -391,7 +391,7 @@ class TestFramebufferProcessUpdate:
 
     def test_process_update_empty_list(self) -> None:
         """Test processing empty update list."""
-        mock_conn = Mock(spec=VNCConnection)
+        mock_conn = Mock(spec=TCPVNCConnection)
         config = FramebufferConfig(
             width=800, height=600, pixel_format=b"RGBA", name="test"
         )
@@ -405,7 +405,7 @@ class TestFramebufferProcessUpdate:
 
     def test_process_update_single_rectangle(self) -> None:
         """Test processing single rectangle update."""
-        mock_conn = Mock(spec=VNCConnection)
+        mock_conn = Mock(spec=TCPVNCConnection)
         config = FramebufferConfig(
             width=800, height=600, pixel_format=b"RGBA", name="test"
         )
@@ -424,7 +424,7 @@ class TestFramebufferProcessUpdate:
 
     def test_process_update_multiple_rectangles(self) -> None:
         """Test processing multiple rectangles."""
-        mock_conn = Mock(spec=VNCConnection)
+        mock_conn = Mock(spec=TCPVNCConnection)
         config = FramebufferConfig(
             width=800, height=600, pixel_format=b"RGBA", name="test"
         )

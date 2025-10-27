@@ -1,5 +1,5 @@
 """
-Unit tests for VNCConnection.
+Unit tests for TCPVNCConnection.
 
 Tests connection lifecycle, protocol handling, and error scenarios
 with mock socket connections.
@@ -8,7 +8,7 @@ with mock socket connections.
 from unittest.mock import Mock, patch, MagicMock
 import pytest
 
-from vnc_agent_bridge.core.connection import VNCConnection
+from vnc_agent_bridge.core.connection_tcp import TCPVNCConnection
 from vnc_agent_bridge.exceptions import (
     VNCConnectionError,
     VNCStateError,
@@ -17,11 +17,11 @@ from vnc_agent_bridge.exceptions import (
 
 
 class TestConnectionInit:
-    """Tests for VNCConnection initialization."""
+    """Tests for TCPVNCConnection initialization."""
 
     def test_connection_init_defaults(self) -> None:
         """Test connection initialization with default parameters."""
-        conn = VNCConnection("localhost")
+        conn = TCPVNCConnection("localhost")
         assert conn.host == "localhost"
         assert conn.port == 5900
         assert conn.username is None
@@ -29,24 +29,24 @@ class TestConnectionInit:
 
     def test_connection_init_custom_port(self) -> None:
         """Test connection initialization with custom port."""
-        conn = VNCConnection("192.168.1.1", port=5901)
+        conn = TCPVNCConnection("192.168.1.1", port=5901)
         assert conn.host == "192.168.1.1"
         assert conn.port == 5901
 
     def test_connection_init_with_credentials(self) -> None:
         """Test connection initialization with username and password."""
-        conn = VNCConnection("localhost", username="user", password="pass")
+        conn = TCPVNCConnection("localhost", username="user", password="pass")
         assert conn.username == "user"
         assert conn.password == "pass"
 
     def test_connection_not_connected_initially(self) -> None:
         """Test that connection is not connected on initialization."""
-        conn = VNCConnection("localhost")
+        conn = TCPVNCConnection("localhost")
         assert conn.is_connected is False
 
 
 class TestConnectionConnect:
-    """Tests for VNCConnection.connect() method."""
+    """Tests for TCPVNCConnection.connect() method."""
 
     @patch("socket.socket")
     def test_connection_connect_success(self, mock_socket_class: Mock) -> None:
@@ -58,7 +58,7 @@ class TestConnectionConnect:
             b"\x00\x00\x00\x01",  # Security type 1 (no auth) (4 bytes)
         ]
 
-        conn = VNCConnection("localhost")
+        conn = TCPVNCConnection("localhost")
         conn.connect()
 
         mock_socket.connect.assert_called_once()
@@ -71,7 +71,7 @@ class TestConnectionConnect:
         mock_socket_class.return_value = mock_socket
         mock_socket.connect.side_effect = OSError("Connection refused")
 
-        conn = VNCConnection("localhost")
+        conn = TCPVNCConnection("localhost")
         with pytest.raises(VNCConnectionError):
             conn.connect()
 
@@ -87,7 +87,7 @@ class TestConnectionConnect:
             b"\x00\x00\x00\x01",  # Security type 1 (no auth) (4 bytes)
         ]
 
-        conn = VNCConnection("localhost")
+        conn = TCPVNCConnection("localhost")
         conn.connect()
 
         # Try to connect again
@@ -96,7 +96,7 @@ class TestConnectionConnect:
 
 
 class TestConnectionDisconnect:
-    """Tests for VNCConnection.disconnect() method."""
+    """Tests for TCPVNCConnection.disconnect() method."""
 
     @patch("socket.socket")
     def test_connection_disconnect_when_connected(
@@ -110,7 +110,7 @@ class TestConnectionDisconnect:
             b"\x00\x00\x00\x01",  # Security type 1 (no auth) (4 bytes)
         ]
 
-        conn = VNCConnection("localhost")
+        conn = TCPVNCConnection("localhost")
         conn.connect()
 
         conn.disconnect()
@@ -119,7 +119,7 @@ class TestConnectionDisconnect:
 
     def test_connection_disconnect_when_not_connected(self) -> None:
         """Test disconnecting when not connected."""
-        conn = VNCConnection("localhost")
+        conn = TCPVNCConnection("localhost")
         # Should not raise an error
         conn.disconnect()
         assert conn.is_connected is False
@@ -130,7 +130,7 @@ class TestConnectionStatus:
 
     def test_is_connected_property_disconnected(self) -> None:
         """Test is_connected property when not connected."""
-        conn = VNCConnection("localhost")
+        conn = TCPVNCConnection("localhost")
         assert conn.is_connected is False
 
     @patch("socket.socket")
@@ -143,7 +143,7 @@ class TestConnectionStatus:
             b"\x00\x00\x00\x01",  # Security type 1 (no auth) (4 bytes)
         ]
 
-        conn = VNCConnection("localhost")
+        conn = TCPVNCConnection("localhost")
         conn.connect()
 
         assert conn.is_connected is True
@@ -162,7 +162,7 @@ class TestConnectionSendPointerEvent:
             b"\x00\x00\x00\x01",  # Security type 1 (no auth) (4 bytes)
         ]
 
-        conn = VNCConnection("localhost")
+        conn = TCPVNCConnection("localhost")
         conn.connect()
 
         conn.send_pointer_event(100, 150, 1)
@@ -170,7 +170,7 @@ class TestConnectionSendPointerEvent:
 
     def test_send_pointer_event_not_connected(self) -> None:
         """Test sending pointer event when not connected."""
-        conn = VNCConnection("localhost")
+        conn = TCPVNCConnection("localhost")
         with pytest.raises(VNCStateError):
             conn.send_pointer_event(100, 150, 1)
 
@@ -188,7 +188,7 @@ class TestConnectionSendKeyEvent:
             b"\x00\x00\x00\x01",  # Security type 1 (no auth) (4 bytes)
         ]
 
-        conn = VNCConnection("localhost")
+        conn = TCPVNCConnection("localhost")
         conn.connect()
 
         conn.send_key_event(0xFF0D, True)
@@ -196,7 +196,7 @@ class TestConnectionSendKeyEvent:
 
     def test_send_key_event_not_connected(self) -> None:
         """Test sending key event when not connected."""
-        conn = VNCConnection("localhost")
+        conn = TCPVNCConnection("localhost")
         with pytest.raises(VNCStateError):
             conn.send_key_event(0xFF0D, True)
 
@@ -213,7 +213,7 @@ class TestConnectionErrorHandling:
         mock_socket_class.return_value = mock_socket
         mock_socket.recv.return_value = b"RFB 002.003\n"  # Unsupported version
 
-        conn = VNCConnection("localhost")
+        conn = TCPVNCConnection("localhost")
         with pytest.raises(VNCProtocolError):
             conn.connect()
 
@@ -226,17 +226,17 @@ class TestConnectionErrorHandling:
         mock_socket_class.return_value = mock_socket
         mock_socket.recv.return_value = b"INVALID RESPONSE\n"
 
-        conn = VNCConnection("localhost")
+        conn = TCPVNCConnection("localhost")
         with pytest.raises(VNCProtocolError):
             conn.connect()
 
 
 class TestConnectionEdgeCases:
-    """Edge case tests for VNCConnection."""
+    """Edge case tests for TCPVNCConnection."""
 
     def test_connection_multiple_disconnect_calls(self) -> None:
         """Test calling disconnect multiple times."""
-        conn = VNCConnection("localhost")
+        conn = TCPVNCConnection("localhost")
         conn.disconnect()
         conn.disconnect()  # Should not raise
 
@@ -245,7 +245,7 @@ class TestConnectionEdgeCases:
         self, mock_socket_class: Mock
     ) -> None:
         """Test that connection attributes are correct after initialization."""
-        conn = VNCConnection(
+        conn = TCPVNCConnection(
             "example.com", port=5902, username="admin", password="secret"
         )
         assert conn.host == "example.com"

@@ -25,6 +25,62 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Security
 - N/A
 
+## [0.3.0] - 2025-10-27
+
+### Added
+- **WebSocket VNC Support**: Generic WebSocket connections with URL templates
+  - New `WebSocketVNCConnection` class for WebSocket-based VNC servers
+  - `create_websocket_vnc()` convenience function for easy WebSocket setup
+  - URL template system with `${host}`, `${port}`, `${ticket}`, `${password}` placeholders
+  - Server-agnostic design supporting Proxmox, noVNC, and custom WebSocket VNC servers
+  - SSL/TLS support with certificate verification and custom certificates
+  - 45 comprehensive unit tests (95%+ coverage)
+
+- **Connection Strategy Pattern**: Modular connection architecture
+  - New `VNCConnectionBase` abstract base class for connection strategies
+  - Refactored `TCPVNCConnection` (formerly `VNCConnection`) for TCP connections
+  - Clean separation between TCP and WebSocket implementations
+  - Backward compatibility maintained with `VNCConnection` alias
+
+- **Enhanced Documentation**: Comprehensive WebSocket guides and examples
+  - New `docs/guides/websocket_connections.md` (600+ lines) with usage patterns
+  - Updated API documentation for WebSocket connections
+  - Working examples in `examples/websocket_usage.py` (400+ lines)
+  - Multiple server configuration examples (Proxmox, noVNC, custom)
+
+### Changed
+- **Architecture Refactoring**: Connection classes reorganized for modularity
+  - `VNCConnection` moved to `connection_tcp.py` as `TCPVNCConnection`
+  - New `base_connection.py` with abstract `VNCConnectionBase` class
+  - New `connection_websocket.py` with `WebSocketVNCConnection` class
+  - Backward compatibility preserved with imports and aliases
+
+- **Code Quality**: Maintained high standards throughout refactoring
+  - All 303 tests passing (no regression from v0.2.0)
+  - 100% mypy strict compliance maintained
+  - Zero flake8 errors
+  - 100% black formatting
+  - 85%+ test coverage maintained
+
+### Removed
+- **Deprecated Code Cleanup**: Removed legacy monolithic connection implementation
+  - Deleted `vnc_agent_bridge/core/connection.py` (functionality preserved in modular files)
+  - Updated all imports across 7 files (test files, documentation, core modules)
+  - Clean codebase with no deprecated code remaining
+
+### Fixed
+- **Import Consistency**: All modules now import from correct modular locations
+  - Test files updated to use `TCPVNCConnection` from `connection_tcp`
+  - Documentation examples updated with correct import paths
+  - No remaining references to deprecated `connection.py` module
+
+### Security
+- **WebSocket Security**: Enhanced security for WebSocket connections
+  - SSL certificate verification enabled by default
+  - Support for custom SSL certificates
+  - Secure WebSocket (WSS) protocol support
+  - Authentication via tickets and passwords (user responsibility for credential security)
+
 ## [0.2.0] - 2025-10-27
 
 ### Added

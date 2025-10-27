@@ -17,7 +17,7 @@ from vnc_agent_bridge.types.common import (
 )
 
 if TYPE_CHECKING:
-    from vnc_agent_bridge.core.connection import VNCConnection
+    from vnc_agent_bridge.core.base_connection import VNCConnectionBase
     from vnc_agent_bridge.core.framebuffer import FramebufferManager
     from vnc_agent_bridge.core.screenshot import ScreenshotController
 
@@ -27,7 +27,7 @@ class VideoRecorder:
 
     def __init__(
         self,
-        connection: VNCConnection,
+        connection: VNCConnectionBase,
         framebuffer: FramebufferManager,
         screenshot: ScreenshotController,
     ) -> None:

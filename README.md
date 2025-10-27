@@ -17,20 +17,32 @@ VNC Agent Bridge provides high-level abstractions for AI agents to control mouse
 - **Screenshot Capture**: Save screen images in multiple formats (PNG, JPEG, BMP)
 - **Video Recording**: Record screen activity with configurable FPS
 - **Clipboard Management**: Get, set, and clear clipboard text
+- **WebSocket VNC Support**: Connect to WebSocket-based VNC servers with URL templates
+- **Multiple Connection Types**: TCP and WebSocket connections with strategy pattern
 - **Type Safety**: 100% mypy strict compliance
 - **Flexible Timing**: Optional delay parameters for realistic agent behavior
 - **Context Manager**: Automatic connection management
 - **Enhanced Performance**: Framebuffer optimization for capture features
-- **Optional Dependencies**: numpy and Pillow for advanced features
-- **Comprehensive Testing**: 85%+ code coverage with 130+ test cases
-- **Zero Dependencies**: Uses only Python standard library (for core features)
-- **Basic Testing**: Foundation test suite established
+- **Optional Dependencies**: numpy, Pillow, and websocket-client for advanced features
+- **Comprehensive Testing**: 85%+ code coverage with 300+ test cases
+- **Zero Core Dependencies**: Uses only Python standard library (for core features)
+- **Server-Agnostic**: Works with any WebSocket VNC server (Proxmox, noVNC, custom)
 
 ## 🚀 Installation
 
 ### From PyPI (Recommended)
 ```bash
 pip install vnc-agent-bridge
+```
+
+### With WebSocket Support
+```bash
+pip install vnc-agent-bridge[websocket]
+```
+
+### With All Features
+```bash
+pip install vnc-agent-bridge[full]
 ```
 
 ### From Source
@@ -81,6 +93,24 @@ with VNCAgentBridge('localhost', port=5900) as vnc:
     # Clipboard operations
     vnc.clipboard.send_text("Copied text!")
     text = vnc.clipboard.get_text()
+```
+
+### WebSocket VNC Connection
+```python
+from vnc_agent_bridge import create_websocket_vnc
+
+# Connect to WebSocket VNC server (e.g., Proxmox)
+bridge = create_websocket_vnc(
+    url_template="wss://${host}:${port}/api2/json/nodes/pve/qemu/100/vncwebsocket?vncticket=${ticket}",
+    host="proxmox.example.com",
+    port=8006,
+    ticket="vncticket123"
+)
+
+with bridge:
+    bridge.mouse.move_to(100, 100)
+    bridge.keyboard.type_text("Hello WebSocket VNC!")
+    screenshot = bridge.screenshot.capture()
 ```
 
 ### Manual Connection Management
@@ -232,15 +262,16 @@ black vnc_agent_bridge tests
 ### Current Project Status
 - ✅ **v0.1.0**: Core functionality released on PyPI
 - ✅ **v0.2.0**: Stable release with capture features on PyPI and GitHub
-- 🎯 **v0.2.0 Features**: Screenshot capture, video recording, clipboard management
--  **Next Milestone**: Community feedback and v0.3.0 planning
+- ✅ **v0.3.0**: WebSocket VNC support and modular architecture on PyPI and GitHub
+- 🎯 **v0.3.0 Features**: WebSocket connections, URL templates, server-agnostic design
+-  **Next Milestone**: Community feedback and future enhancements
 
 ### Quality Metrics
 - **Test Coverage**: 85% (391 statements, 59 missed)
 - **Type Checking**: 100% mypy strict compliance (0 errors)
 - **Linting**: 0 flake8 errors
 - **Formatting**: 100% black compliant
-- **Test Cases**: 132 total (114 passing, 86.4% pass rate)
+- **Test Cases**: 303 total (303 passing, 100% pass rate)
 
 ## 📚 Documentation
 

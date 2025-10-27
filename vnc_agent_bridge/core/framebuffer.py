@@ -27,13 +27,13 @@ import numpy as np
 from typing import Optional, List, Tuple, Any
 
 from ..types.common import FramebufferConfig
-from .connection import VNCConnection
+from .base_connection import VNCConnectionBase
 
 
 class FramebufferManager:
     """Manages framebuffer state and updates."""
 
-    def __init__(self, connection: VNCConnection, config: FramebufferConfig):
+    def __init__(self, connection: VNCConnectionBase, config: FramebufferConfig):
         """Initialize framebuffer manager.
 
         Args:

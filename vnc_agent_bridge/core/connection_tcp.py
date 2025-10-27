@@ -1,36 +1,17 @@
-"""VNC Connection protocol implementation.
+"""TCP-based VNC connection implementation.
 
-This module implements low-level VNC (Remote Framebuffer) protocol communication
-for interacting with VNC servers. It handles connection management, protocol
-handshaking, and sending VNC events (pointer and key events).
+This module implements VNCConnectionBase for standard TCP socket connections
+to VNC servers. It handles the RFB 3.8 protocol over raw TCP sockets.
 
-The implementation uses the RFB 3.8 protocol specification and communicates
-over TCP sockets. It abstracts the binary protocol details and provides
-higher-level methods for sending input events.
-
-Protocol Overview:
-    - Handshake: Protocol version negotiation
-    - Connection: TCP socket to VNC server
-    - Events: Pointer (mouse) and Key events are the primary messages
-    - Data Format: Big-endian binary format with specific message structures
-
-Message Types:
-    - Pointer Event (Type 5): Mouse position and button state
-    - Key Event (Type 4): Keyboard input with key code and press/release state
-
-Example:
-    Low-level protocol usage:
-        conn = VNCConnection('localhost', port=5900)
-        conn.connect()
-        conn.send_pointer_event(100, 100, 1)  # Click at (100, 100)
-        conn.send_key_event(0xFF0D, True)     # Press Return key
-        conn.disconnect()
+This is the refactored version of the original VNCConnection class, now
+inheriting from VNCConnectionBase to support multiple connection types.
 """
 
 import socket
 import struct
-from typing import Optional, List, Tuple
+from typing import List, Optional, Tuple
 
+from .base_connection import VNCConnectionBase
 from ..exceptions import (
     VNCConnectionError,
     VNCTimeoutError,
@@ -39,21 +20,8 @@ from ..exceptions import (
 )
 
 
-class VNCConnection:
-    """Manages low-level VNC protocol communication."""
-
-    # VNC Protocol Constants
-    PROTOCOL_VERSION = b"RFB 003.008\n"
-    POINTER_EVENT = 5
-    KEY_EVENT = 4
-
-    # Framebuffer message types (v0.2.0)
-    FRAMEBUFFER_UPDATE_REQUEST = 3
-    SET_ENCODINGS = 2
-    FRAMEBUFFER_UPDATE = 0
-    SET_PIXEL_FORMAT = 0
-    CLIPBOARD_TEXT_CLIENT = 6
-    CLIPBOARD_TEXT_SERVER = 3
+class TCPVNCConnection(VNCConnectionBase):
+    """Manages low-level VNC protocol communication over TCP sockets."""
 
     def __init__(
         self,
@@ -63,7 +31,7 @@ class VNCConnection:
         password: Optional[str] = None,
         timeout: float = 10.0,
     ) -> None:
-        """Initialize VNC connection parameters.
+        """Initialize TCP VNC connection parameters.
 
         Args:
             host: VNC server hostname or IP address

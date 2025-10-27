@@ -17,10 +17,10 @@ Initialize the clipboard controller.
 
 **Example:**
 ```python
-from vnc_agent_bridge.core.connection import VNCConnection
+from vnc_agent_bridge.core.connection_tcp import TCPVNCConnection
 from vnc_agent_bridge.core.clipboard import ClipboardController
 
-connection = VNCConnection('localhost', port=5900)
+connection = TCPVNCConnection('localhost', port=5900)
 connection.connect()
 
 clipboard = ClipboardController(connection)

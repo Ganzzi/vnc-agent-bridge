@@ -30,17 +30,17 @@ from typing import Optional
 
 from ..types.common import Position, MouseButton
 from ..exceptions import VNCInputError
-from .connection import VNCConnection
+from .base_connection import VNCConnectionBase
 
 
 class MouseController:
     """Control mouse/pointer operations."""
 
-    def __init__(self, connection: VNCConnection) -> None:
+    def __init__(self, connection: VNCConnectionBase) -> None:
         """Initialize with VNC connection.
 
         Args:
-            connection: VNCConnection instance for protocol communication
+            connection: VNCConnectionBase instance for protocol communication
         """
         self._connection = connection
         self._current_position: Position = (0, 0)

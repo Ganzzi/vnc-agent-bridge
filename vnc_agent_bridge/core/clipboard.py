@@ -28,17 +28,17 @@ import time
 from typing import Optional
 
 from ..exceptions import VNCInputError
-from .connection import VNCConnection
+from .base_connection import VNCConnectionBase
 
 
 class ClipboardController:
     """Manages clipboard operations on remote VNC server."""
 
-    def __init__(self, connection: VNCConnection) -> None:
+    def __init__(self, connection: VNCConnectionBase) -> None:
         """Initialize clipboard controller.
 
         Args:
-            connection: VNCConnection instance for protocol communication
+            connection: VNCConnectionBase instance for protocol communication
         """
         self._connection = connection
         self._cached_content: Optional[str] = None

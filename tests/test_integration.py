@@ -8,7 +8,7 @@ from unittest.mock import Mock, patch, MagicMock
 import pytest
 
 from vnc_agent_bridge.core.bridge import VNCAgentBridge
-from vnc_agent_bridge.core.connection import VNCConnection
+from vnc_agent_bridge.core.connection_tcp import TCPVNCConnection
 from vnc_agent_bridge.core.mouse import MouseController
 from vnc_agent_bridge.core.keyboard import KeyboardController
 from vnc_agent_bridge.core.scroll import ScrollController
@@ -17,7 +17,7 @@ from vnc_agent_bridge.core.scroll import ScrollController
 def setup_bridge_with_mock() -> VNCAgentBridge:
     """Helper to create a bridge with mocked connection and initialized controllers."""
     bridge = VNCAgentBridge("localhost")
-    bridge._connection = Mock(spec=VNCConnection)
+    bridge._connection = Mock(spec=TCPVNCConnection)
     bridge._connection.is_connected = True
     bridge._connection.send_pointer_event = Mock()
     bridge._connection.send_key_event = Mock()
@@ -142,7 +142,7 @@ class TestBridgeContextManager:
         """Test performing operations within context manager."""
         bridge = setup_bridge_with_mock()
 
-        with patch("vnc_agent_bridge.core.connection.VNCConnection.connect"):
+        with patch("vnc_agent_bridge.core.connection_tcp.TCPVNCConnection.connect"):
             bridge.mouse.left_click(100, 100)
             bridge.mouse._connection.send_pointer_event.assert_called()
 
@@ -318,7 +318,7 @@ class TestBridgeV020Features:
         from vnc_agent_bridge.exceptions import VNCStateError
 
         bridge = VNCAgentBridge("localhost", enable_framebuffer=False)
-        bridge._connection = Mock(spec=VNCConnection)
+        bridge._connection = Mock(spec=TCPVNCConnection)
         bridge._connection.is_connected = True
         # Don't initialize controllers that require framebuffer
 
@@ -330,7 +330,7 @@ class TestBridgeV020Features:
         from vnc_agent_bridge.exceptions import VNCStateError
 
         bridge = VNCAgentBridge("localhost", enable_framebuffer=False)
-        bridge._connection = Mock(spec=VNCConnection)
+        bridge._connection = Mock(spec=TCPVNCConnection)
         bridge._connection.is_connected = True
 
         with pytest.raises(VNCStateError, match="Video feature not enabled"):
@@ -339,7 +339,7 @@ class TestBridgeV020Features:
     def test_bridge_framebuffer_enabled(self) -> None:
         """Test framebuffer access when enabled."""
         bridge = VNCAgentBridge("localhost", enable_framebuffer=True)
-        bridge._connection = Mock(spec=VNCConnection)
+        bridge._connection = Mock(spec=TCPVNCConnection)
         bridge._connection.is_connected = True
         bridge._framebuffer = Mock()
 
@@ -348,7 +348,7 @@ class TestBridgeV020Features:
     def test_bridge_framebuffer_disabled(self) -> None:
         """Test framebuffer access when disabled."""
         bridge = VNCAgentBridge("localhost", enable_framebuffer=False)
-        bridge._connection = Mock(spec=VNCConnection)
+        bridge._connection = Mock(spec=TCPVNCConnection)
         bridge._connection.is_connected = True
 
         assert bridge.framebuffer is None
@@ -392,7 +392,7 @@ class TestBridgeV020Features:
     def test_bridge_optional_components_not_initialized_when_disabled(self) -> None:
         """Test optional components not initialized when framebuffer disabled."""
         bridge = VNCAgentBridge("localhost", enable_framebuffer=False)
-        bridge._connection = Mock(spec=VNCConnection)
+        bridge._connection = Mock(spec=TCPVNCConnection)
         bridge._connection.is_connected = True
 
         # Manually call connect logic (simplified)

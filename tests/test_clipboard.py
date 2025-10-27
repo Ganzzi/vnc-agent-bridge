@@ -4,7 +4,7 @@ import pytest
 from unittest.mock import Mock, patch
 
 from vnc_agent_bridge.core.clipboard import ClipboardController
-from vnc_agent_bridge.core.connection import VNCConnection
+from vnc_agent_bridge.core.connection_tcp import TCPVNCConnection
 from vnc_agent_bridge.exceptions import VNCInputError
 
 
@@ -13,8 +13,8 @@ class TestClipboardController:
 
     @pytest.fixture
     def mock_connection(self):
-        """Mock VNCConnection for testing."""
-        conn = Mock(spec=VNCConnection)
+        """Mock TCPVNCConnection for testing."""
+        conn = Mock(spec=TCPVNCConnection)
         conn.is_connected = True
         conn.send_clipboard_text = Mock()
         conn.receive_clipboard_text = Mock(return_value=None)

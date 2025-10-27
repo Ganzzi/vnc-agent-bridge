@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vnc-agent-bridge"
-version = "0.2.0"
+version = "0.3.0"
 description = "Open-source Python package for AI agents to interact with VNC servers"
 readme = "README.md"
 license = { text = "MIT" }
@@ -40,6 +40,7 @@ Documentation = "https://github.com/Ganzzi/vnc-agent-bridge#readme"
 capture = ["numpy>=1.20.0", "Pillow>=9.0.0"]
 video = ["numpy>=1.20.0", "Pillow>=9.0.0"]
 full = ["numpy>=1.20.0", "Pillow>=9.0.0"]
+websocket = ["websocket-client>=1.5.0"]
 dev = [
     "pytest>=7.0",
     "pytest-cov>=3.0",

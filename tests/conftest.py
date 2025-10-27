@@ -8,7 +8,7 @@ for use across all test modules.
 from unittest.mock import Mock
 import pytest
 
-from vnc_agent_bridge.core.connection import VNCConnection
+from vnc_agent_bridge.core.connection_tcp import TCPVNCConnection
 from vnc_agent_bridge.core.mouse import MouseController
 from vnc_agent_bridge.core.keyboard import KeyboardController
 from vnc_agent_bridge.core.scroll import ScrollController
@@ -23,7 +23,7 @@ def mock_vnc_connection() -> Mock:
     Returns:
         Mock: Configured mock connection object with common attributes/methods.
     """
-    connection = Mock(spec=VNCConnection)
+    connection = Mock(spec=TCPVNCConnection)
     connection.is_connected = True
     connection.send_pointer_event = Mock()
     connection.send_key_event = Mock()
@@ -101,6 +101,6 @@ def vnc_bridge_disconnected() -> VNCAgentBridge:
         VNCAgentBridge: Initialized but "disconnected" bridge for testing.
     """
     bridge = VNCAgentBridge("localhost", port=5900)
-    bridge._connection = Mock(spec=VNCConnection)
+    bridge._connection = Mock(spec=TCPVNCConnection)
     bridge._connection.is_connected = False
     return bridge

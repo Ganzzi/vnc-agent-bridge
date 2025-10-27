@@ -44,7 +44,7 @@ except ImportError:
 
 from ..types.common import ImageFormat
 from .framebuffer import FramebufferManager
-from .connection import VNCConnection
+from .base_connection import VNCConnectionBase
 from ..exceptions import VNCInputError
 
 
@@ -52,7 +52,7 @@ class ScreenshotController:
     """Handles screenshot capture operations."""
 
     def __init__(
-        self, connection: VNCConnection, framebuffer: FramebufferManager
+        self, connection: VNCConnectionBase, framebuffer: FramebufferManager
     ) -> None:
         """Initialize screenshot controller.
 

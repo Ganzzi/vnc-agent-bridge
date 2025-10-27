@@ -24,7 +24,8 @@ Example:
 
 from typing import TYPE_CHECKING, Any, Optional
 
-from .connection import VNCConnection
+from .base_connection import VNCConnectionBase
+from .connection_tcp import TCPVNCConnection
 from .mouse import MouseController
 from .keyboard import KeyboardController
 from .scroll import ScrollController
@@ -46,24 +47,39 @@ class VNCAgentBridge:
 
     def __init__(
         self,
-        host: str,
+        host: Optional[str] = None,
         port: int = 5900,
         username: Optional[str] = None,
         password: Optional[str] = None,
         timeout: float = 10.0,
+        connection: Optional[VNCConnectionBase] = None,
         enable_framebuffer: bool = True,
     ) -> None:
         """Initialize VNC bridge.
 
         Args:
             host: VNC server hostname or IP address
-            port: VNC server port (default 5900)
+                (ignored if connection provided)
+            port: VNC server port (default 5900,
+                ignored if connection provided)
             username: Optional username for authentication
+                (ignored if connection provided)
             password: Optional password for authentication
+                (ignored if connection provided)
             timeout: Connection timeout in seconds
+                (ignored if connection provided)
+            connection: Custom connection implementation (VNCConnectionBase)
             enable_framebuffer: Enable framebuffer features (screenshot, video)
         """
-        self._connection = VNCConnection(host, port, username, password, timeout)
+        if connection is not None:
+            self._connection = connection
+        else:
+            if host is None:
+                raise ValueError(
+                    "host must be provided when connection is not specified"
+                )
+            self._connection = TCPVNCConnection(host, port, username, password, timeout)
+
         self._enable_framebuffer = enable_framebuffer
         self._mouse: Optional[MouseController] = None
         self._keyboard: Optional[KeyboardController] = None
