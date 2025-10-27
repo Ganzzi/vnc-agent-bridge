@@ -1,7 +1,7 @@
 # VNC Agent Bridge
 
-[![Tests](https://github.com/github-copilot/vnc-agent-bridge/actions/workflows/tests.yml/badge.svg)](https://github.com/github-copilot/vnc-agent-bridge/actions/workflows/tests.yml)
-[![Coverage](https://codecov.io/gh/github-copilot/vnc-agent-bridge/branch/main/graph/badge.svg)](https://codecov.io/gh/github-copilot/vnc-agent-bridge)
+[![Tests](https://github.com/Ganzzi/vnc-agent-bridge/actions/workflows/tests.yml/badge.svg)](https://github.com/Ganzzi/vnc-agent-bridge/actions/workflows/tests.yml)
+[![Coverage](https://codecov.io/gh/Ganzzi/vnc-agent-bridge/branch/main/graph/badge.svg)](https://codecov.io/gh/Ganzzi/vnc-agent-bridge)
 [![PyPI](https://img.shields.io/pypi/v/vnc-agent-bridge)](https://pypi.org/project/vnc-agent-bridge/)
 [![Python](https://img.shields.io/pypi/pyversions/vnc-agent-bridge)](https://pypi.org/project/vnc-agent-bridge/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
@@ -31,14 +31,14 @@ pip install vnc-agent-bridge
 
 ### From Source
 ```bash
-git clone https://github.com/github-copilot/vnc-agent-bridge.git
+git clone https://github.com/Ganzzi/vnc-agent-bridge.git
 cd vnc-agent-bridge
 pip install -e .
 ```
 
 ### Development Installation
 ```bash
-git clone https://github.com/github-copilot/vnc-agent-bridge.git
+git clone https://github.com/Ganzzi/vnc-agent-bridge.git
 cd vnc-agent-bridge
 pip install -e ".[dev]"
 ```
@@ -165,7 +165,7 @@ All methods support an optional `delay` parameter:
 ### Setup Development Environment
 ```bash
 # Clone repository
-git clone https://github.com/github-copilot/vnc-agent-bridge.git
+git clone https://github.com/Ganzzi/vnc-agent-bridge.git
 cd vnc-agent-bridge
 
 # Install development dependencies
@@ -195,6 +195,8 @@ black vnc_agent_bridge tests
 - ✅ **Phase 2**: Core controllers implementation (Complete)
 - ✅ **Phase 3**: Testing & quality assurance (Complete)
 - ✅ **Phase 4**: Documentation & PyPI release (Complete)
+- ✅ **Phase 5**: Final Testing & Release (Complete)
+- 🚀 **Status**: Released on PyPI (v0.1.0)
 
 ### Quality Metrics
 - **Test Coverage**: 85% (391 statements, 59 missed)
@@ -227,16 +229,16 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- Built with GitHub Copilot
+- Built with Ganzzi
 - Inspired by the need for reliable AI agent automation
 - Thanks to the VNC and RFB protocol specifications
 
 ## 📞 Support
 
-- **Issues**: [GitHub Issues](https://github.com/github-copilot/vnc-agent-bridge/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/github-copilot/vnc-agent-bridge/discussions)
-- **Documentation**: [Full Docs](https://github.com/github-copilot/vnc-agent-bridge#readme)
+- **Issues**: [GitHub Issues](https://github.com/Ganzzi/vnc-agent-bridge/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/Ganzzi/vnc-agent-bridge/discussions)
+- **Documentation**: [Full Docs](https://github.com/Ganzzi/vnc-agent-bridge#readme)
 
 ---
 
-**Made with ❤️ by GitHub Copilot**
+**Made with ❤️ by Ganzzi**

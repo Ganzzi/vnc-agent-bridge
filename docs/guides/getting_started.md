@@ -13,7 +13,7 @@ pip install vnc-agent-bridge
 ### From Source
 
 ```bash
-git clone https://github.com/github-copilot/vnc-agent-bridge.git
+git clone https://github.com/Ganzzi/vnc-agent-bridge.git
 cd vnc-agent-bridge
 pip install -e .
 ```
@@ -21,7 +21,7 @@ pip install -e .
 ### Development Installation
 
 ```bash
-git clone https://github.com/github-copilot/vnc-agent-bridge.git
+git clone https://github.com/Ganzzi/vnc-agent-bridge.git
 cd vnc-agent-bridge
 pip install -e ".[dev]"
 ```
@@ -309,8 +309,8 @@ For development and testing without a real VNC server, check out the error_handl
 ## Support
 
 - **Documentation:** See [API Reference](../api/) and [Guides](.)
-- **Issues:** Report on [GitHub Issues](https://github.com/github-copilot/vnc-agent-bridge/issues)
-- **Questions:** Ask on [GitHub Discussions](https://github.com/github-copilot/vnc-agent-bridge/discussions)
+- **Issues:** Report on [GitHub Issues](https://github.com/Ganzzi/vnc-agent-bridge/issues)
+- **Questions:** Ask on [GitHub Discussions](https://github.com/Ganzzi/vnc-agent-bridge/discussions)
 
 ## What's Next?
 

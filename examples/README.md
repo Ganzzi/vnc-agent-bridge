@@ -258,8 +258,8 @@ Additional Resources
 
 - Full API Documentation: docs/api/
 - Usage Guides: docs/guides/
-- GitHub Repository: https://github.com/github-copilot/vnc-agent-bridge
-- Issue Tracker: https://github.com/github-copilot/vnc-agent-bridge/issues
+- GitHub Repository: https://github.com/Ganzzi/vnc-agent-bridge
+- Issue Tracker: https://github.com/Ganzzi/vnc-agent-bridge/issues
 
 
 Support

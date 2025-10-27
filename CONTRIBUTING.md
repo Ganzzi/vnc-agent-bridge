@@ -79,7 +79,7 @@ black vnc_agent_bridge tests --check
 ## 🔄 Development Workflow
 
 ### 1. Choose an Issue
-- Check [GitHub Issues](https://github.com/github-copilot/vnc-agent-bridge/issues) for open tasks
+- Check [GitHub Issues](https://github.com/Ganzzi/vnc-agent-bridge/issues) for open tasks
 - Look for issues labeled `good first issue` or `help wanted`
 - Comment on the issue to indicate you're working on it
 

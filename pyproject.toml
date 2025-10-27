@@ -9,8 +9,8 @@ description = "Open-source Python package for AI agents to interact with VNC ser
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.8"
-authors = [{ name = "GitHub Copilot", email = "copilot@github.com" }]
-maintainers = [{ name = "GitHub Copilot", email = "copilot@github.com" }]
+authors = [{ name = "Ganzzi", email = "boinguyen9701@gmail.com" }]
+maintainers = [{ name = "Ganzzi", email = "boinguyen9701@gmail.com" }]
 keywords = ["vnc", "automation", "ai", "agent", "remote-control"]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -31,10 +31,10 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/github-copilot/vnc-agent-bridge"
-Repository = "https://github.com/github-copilot/vnc-agent-bridge"
-Issues = "https://github.com/github-copilot/vnc-agent-bridge/issues"
-Documentation = "https://github.com/github-copilot/vnc-agent-bridge#readme"
+Homepage = "https://github.com/Ganzzi/vnc-agent-bridge"
+Repository = "https://github.com/Ganzzi/vnc-agent-bridge"
+Issues = "https://github.com/Ganzzi/vnc-agent-bridge/issues"
+Documentation = "https://github.com/Ganzzi/vnc-agent-bridge#readme"
 
 [project.optional-dependencies]
 dev = [
