@@ -282,7 +282,6 @@ class TestKeyboardEdgeCases:
     ) -> None:
         """Test multiple hotkeys in sequence."""
         keyboard_controller.hotkey("ctrl", "a")
-        initial_count = mock_vnc_connection.send_key_event.call_count
         mock_vnc_connection.reset_mock()
         keyboard_controller.hotkey("ctrl", "c")
         assert mock_vnc_connection.send_key_event.call_count >= 3

@@ -53,11 +53,13 @@ class TestConnectionConnect:
         """Test successful connection."""
         mock_socket = MagicMock()
         mock_socket_class.return_value = mock_socket
-        mock_socket.recv.return_value = b"RFB 003.008\n"
+        mock_socket.recv.side_effect = [
+            b"RFB 003.008\n",  # Server protocol version (12 bytes)
+            b"\x00\x00\x00\x01",  # Security type 1 (no auth) (4 bytes)
+        ]
 
         conn = VNCConnection("localhost")
-        with patch.object(conn, "send"):
-            conn.connect()
+        conn.connect()
 
         mock_socket.connect.assert_called_once()
         assert conn.is_connected is True
@@ -80,11 +82,13 @@ class TestConnectionConnect:
         """Test that connecting when already connected raises error."""
         mock_socket = MagicMock()
         mock_socket_class.return_value = mock_socket
-        mock_socket.recv.return_value = b"RFB 003.008\n"
+        mock_socket.recv.side_effect = [
+            b"RFB 003.008\n",  # Server protocol version (12 bytes)
+            b"\x00\x00\x00\x01",  # Security type 1 (no auth) (4 bytes)
+        ]
 
         conn = VNCConnection("localhost")
-        with patch.object(conn, "send"):
-            conn.connect()
+        conn.connect()
 
         # Try to connect again
         with pytest.raises(VNCStateError):
@@ -101,11 +105,13 @@ class TestConnectionDisconnect:
         """Test disconnecting when connected."""
         mock_socket = MagicMock()
         mock_socket_class.return_value = mock_socket
-        mock_socket.recv.return_value = b"RFB 003.008\n"
+        mock_socket.recv.side_effect = [
+            b"RFB 003.008\n",  # Server protocol version (12 bytes)
+            b"\x00\x00\x00\x01",  # Security type 1 (no auth) (4 bytes)
+        ]
 
         conn = VNCConnection("localhost")
-        with patch.object(conn, "send"):
-            conn.connect()
+        conn.connect()
 
         conn.disconnect()
         assert conn.is_connected is False
@@ -132,11 +138,13 @@ class TestConnectionStatus:
         """Test is_connected property when connected."""
         mock_socket = MagicMock()
         mock_socket_class.return_value = mock_socket
-        mock_socket.recv.return_value = b"RFB 003.008\n"
+        mock_socket.recv.side_effect = [
+            b"RFB 003.008\n",  # Server protocol version (12 bytes)
+            b"\x00\x00\x00\x01",  # Security type 1 (no auth) (4 bytes)
+        ]
 
         conn = VNCConnection("localhost")
-        with patch.object(conn, "send"):
-            conn.connect()
+        conn.connect()
 
         assert conn.is_connected is True
 
@@ -149,11 +157,13 @@ class TestConnectionSendPointerEvent:
         """Test sending pointer event."""
         mock_socket = MagicMock()
         mock_socket_class.return_value = mock_socket
-        mock_socket.recv.return_value = b"RFB 003.008\n"
+        mock_socket.recv.side_effect = [
+            b"RFB 003.008\n",  # Server protocol version (12 bytes)
+            b"\x00\x00\x00\x01",  # Security type 1 (no auth) (4 bytes)
+        ]
 
         conn = VNCConnection("localhost")
-        with patch.object(conn, "send"):
-            conn.connect()
+        conn.connect()
 
         conn.send_pointer_event(100, 150, 1)
         mock_socket.sendall.assert_called()
@@ -173,11 +183,13 @@ class TestConnectionSendKeyEvent:
         """Test sending key event."""
         mock_socket = MagicMock()
         mock_socket_class.return_value = mock_socket
-        mock_socket.recv.return_value = b"RFB 003.008\n"
+        mock_socket.recv.side_effect = [
+            b"RFB 003.008\n",  # Server protocol version (12 bytes)
+            b"\x00\x00\x00\x01",  # Security type 1 (no auth) (4 bytes)
+        ]
 
         conn = VNCConnection("localhost")
-        with patch.object(conn, "send"):
-            conn.connect()
+        conn.connect()
 
         conn.send_key_event(0xFF0D, True)
         mock_socket.sendall.assert_called()
@@ -217,32 +229,6 @@ class TestConnectionErrorHandling:
         conn = VNCConnection("localhost")
         with pytest.raises(VNCProtocolError):
             conn.connect()
-
-
-class TestConnectionGetPosition:
-    """Tests for getting cursor position."""
-
-    @patch("socket.socket")
-    def test_get_position_when_connected(self, mock_socket_class: Mock) -> None:
-        """Test getting position when connected."""
-        mock_socket = MagicMock()
-        mock_socket_class.return_value = mock_socket
-        mock_socket.recv.return_value = b"RFB 003.008\n"
-
-        conn = VNCConnection("localhost")
-        with patch.object(conn, "send"):
-            conn.connect()
-
-        # Mock position getter
-        with patch.object(conn, "get_position", return_value=(100, 150)):
-            pos = conn.get_position()
-            assert pos == (100, 150)
-
-    def test_get_position_not_connected(self) -> None:
-        """Test getting position when not connected."""
-        conn = VNCConnection("localhost")
-        with pytest.raises(VNCStateError):
-            conn.get_position()
 
 
 class TestConnectionEdgeCases:

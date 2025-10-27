@@ -12,7 +12,6 @@ from vnc_agent_bridge.core.connection import VNCConnection
 from vnc_agent_bridge.core.mouse import MouseController
 from vnc_agent_bridge.core.keyboard import KeyboardController
 from vnc_agent_bridge.core.scroll import ScrollController
-from vnc_agent_bridge.exceptions import VNCStateError
 
 
 def setup_bridge_with_mock() -> VNCAgentBridge:
@@ -61,11 +60,13 @@ class TestBridgeConnectDisconnect:
         """Test bridge connect."""
         mock_socket = MagicMock()
         mock_socket_class.return_value = mock_socket
-        mock_socket.recv.return_value = b"RFB 003.008\n"
+        mock_socket.recv.side_effect = [
+            b"RFB 003.008\n",  # Server protocol version (12 bytes)
+            b"\x00\x00\x00\x01",  # Security type 1 (no auth) (4 bytes)
+        ]
 
         bridge = VNCAgentBridge("localhost")
-        with patch.object(bridge._connection, "send"):
-            bridge.connect()
+        bridge.connect()
 
         assert bridge.is_connected is True
 
@@ -74,11 +75,13 @@ class TestBridgeConnectDisconnect:
         """Test bridge disconnect."""
         mock_socket = MagicMock()
         mock_socket_class.return_value = mock_socket
-        mock_socket.recv.return_value = b"RFB 003.008\n"
+        mock_socket.recv.side_effect = [
+            b"RFB 003.008\n",  # Server protocol version (12 bytes)
+            b"\x00\x00\x00\x01",  # Security type 1 (no auth) (4 bytes)
+        ]
 
         bridge = VNCAgentBridge("localhost")
-        with patch.object(bridge._connection, "send"):
-            bridge.connect()
+        bridge.connect()
 
         bridge.disconnect()
         assert bridge.is_connected is False
@@ -121,14 +124,16 @@ class TestBridgeContextManager:
         """Test context manager enter and exit."""
         mock_socket = MagicMock()
         mock_socket_class.return_value = mock_socket
-        mock_socket.recv.return_value = b"RFB 003.008\n"
+        mock_socket.recv.side_effect = [
+            b"RFB 003.008\n",  # Server protocol version (12 bytes)
+            b"\x00\x00\x00\x01",  # Security type 1 (no auth) (4 bytes)
+        ]
 
-        with patch("vnc_agent_bridge.core.connection.VNCConnection.send"):
-            with VNCAgentBridge("localhost") as bridge:
-                assert bridge.is_connected is True
+        with VNCAgentBridge("localhost") as bridge:
+            assert bridge.is_connected is True
 
-            # After exit, should be disconnected
-            assert bridge.is_connected is False
+        # After exit, should be disconnected
+        assert bridge.is_connected is False
 
     @patch("socket.socket")
     def test_bridge_context_manager_with_operations(
@@ -148,17 +153,19 @@ class TestBridgeContextManager:
         """Test that context manager cleans up on exception."""
         mock_socket = MagicMock()
         mock_socket_class.return_value = mock_socket
-        mock_socket.recv.return_value = b"RFB 003.008\n"
+        mock_socket.recv.side_effect = [
+            b"RFB 003.008\n",  # Server protocol version (12 bytes)
+            b"\x00\x00\x00\x01",  # Security type 1 (no auth) (4 bytes)
+        ]
 
-        with patch("vnc_agent_bridge.core.connection.VNCConnection.send"):
-            try:
-                with VNCAgentBridge("localhost") as bridge:
-                    raise ValueError("Test exception")
-            except ValueError:
-                pass
+        try:
+            with VNCAgentBridge("localhost") as bridge:
+                raise ValueError("Test exception")
+        except ValueError:
+            pass
 
-            # Should still be disconnected even after exception
-            assert bridge.is_connected is False
+        # Should still be disconnected even after exception
+        assert bridge.is_connected is False
 
 
 class TestBridgeWorkflows:

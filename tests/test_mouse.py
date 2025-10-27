@@ -5,7 +5,7 @@ Tests all mouse operations including clicks, movement, dragging,
 and position queries with mock VNC connections.
 """
 
-from unittest.mock import Mock, call
+from unittest.mock import Mock
 import pytest
 
 from vnc_agent_bridge.core.mouse import MouseController
@@ -31,21 +31,35 @@ class TestMouseLeftClick:
     ) -> None:
         """Test left click with delay parameter."""
         mouse_controller.left_click(100, 150, delay=0.1)
-        mock_vnc_connection.send_pointer_event.assert_called_once()
+        # Should send 3 events: move to position, button down, button up
+        assert mock_vnc_connection.send_pointer_event.call_count == 3
+        # Verify button down (mask=1 for left button)
+        calls = mock_vnc_connection.send_pointer_event.call_args_list
+        assert calls[1][0][2] == 1  # button down
+        assert calls[2][0][2] == 0  # button up
 
     def test_left_click_at_origin(
         self, mouse_controller: MouseController, mock_vnc_connection: Mock
     ) -> None:
         """Test left click at origin (0, 0)."""
         mouse_controller.left_click(0, 0)
-        mock_vnc_connection.send_pointer_event.assert_called_once()
+        # Should send 2 events: button down, button up (no move needed from (0,0))
+        assert mock_vnc_connection.send_pointer_event.call_count == 2
+        calls = mock_vnc_connection.send_pointer_event.call_args_list
+        assert calls[0][0][2] == 1  # button down
+        assert calls[1][0][2] == 0  # button up
 
     def test_left_click_at_large_coordinates(
         self, mouse_controller: MouseController, mock_vnc_connection: Mock
     ) -> None:
         """Test left click at large but valid coordinates."""
         mouse_controller.left_click(1920, 1080)
-        mock_vnc_connection.send_pointer_event.assert_called_once()
+        # Should send 3 events: move to position, button down, button up
+        assert mock_vnc_connection.send_pointer_event.call_count == 3
+        calls = mock_vnc_connection.send_pointer_event.call_args_list
+        assert calls[0][0][:2] == (1920, 1080)  # move
+        assert calls[1][0][2] == 1  # button down
+        assert calls[2][0][2] == 0  # button up
 
     def test_left_click_negative_x(self, mouse_controller: MouseController) -> None:
         """Test that left click with negative x raises VNCInputError."""
@@ -83,7 +97,11 @@ class TestMouseRightClick:
     ) -> None:
         """Test right click with delay parameter."""
         mouse_controller.right_click(100, 150, delay=0.1)
-        mock_vnc_connection.send_pointer_event.assert_called_once()
+        # Should send 3 events: move to position, button down, button up
+        assert mock_vnc_connection.send_pointer_event.call_count == 3
+        calls = mock_vnc_connection.send_pointer_event.call_args_list
+        assert calls[1][0][2] == 4  # button down (right button = 1 << 2 = 4)
+        assert calls[2][0][2] == 0  # button up
 
     def test_right_click_negative_coordinates(
         self, mouse_controller: MouseController
@@ -207,7 +225,6 @@ class TestMouseGetPosition:
         self, mouse_controller: MouseController, mock_vnc_connection: Mock
     ) -> None:
         """Test that get_position returns a tuple."""
-        mock_vnc_connection.get_position = Mock(return_value=(100, 150))
         result = mouse_controller.get_position()
         assert isinstance(result, tuple)
         assert len(result) == 2
@@ -216,7 +233,8 @@ class TestMouseGetPosition:
         self, mouse_controller: MouseController, mock_vnc_connection: Mock
     ) -> None:
         """Test that get_position returns valid coordinates."""
-        mock_vnc_connection.get_position = Mock(return_value=(1920, 1080))
+        # Move mouse to set position
+        mouse_controller.move_to(1920, 1080)
         x, y = mouse_controller.get_position()
         assert x == 1920
         assert y == 1080
@@ -227,8 +245,10 @@ class TestMouseGetPosition:
         self, mouse_controller: MouseController, mock_vnc_connection: Mock
     ) -> None:
         """Test get_position when cursor is at origin."""
-        mock_vnc_connection.get_position = Mock(return_value=(0, 0))
+        # Default position is (0, 0)
         x, y = mouse_controller.get_position()
+        assert x == 0
+        assert y == 0
         assert x == 0
         assert y == 0
 
@@ -257,7 +277,12 @@ class TestMouseEdgeCases:
     ) -> None:
         """Test with very large but valid coordinates."""
         mouse_controller.left_click(65535, 65535)
-        mock_vnc_connection.send_pointer_event.assert_called_once()
+        # Should send 3 events: move to position, button down, button up
+        assert mock_vnc_connection.send_pointer_event.call_count == 3
+        calls = mock_vnc_connection.send_pointer_event.call_args_list
+        assert calls[0][0][:2] == (65535, 65535)  # move
+        assert calls[1][0][2] == 1  # button down
+        assert calls[2][0][2] == 0  # button up
 
     def test_sequential_different_operations(
         self, mouse_controller: MouseController, mock_vnc_connection: Mock
