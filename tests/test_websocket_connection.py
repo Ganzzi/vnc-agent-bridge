@@ -26,7 +26,7 @@ class TestWebSocketVNCConnection:
         assert conn.host == "example.com"
         assert conn.port == 6900
         assert conn.ticket == "test_ticket"
-        assert conn.password is None
+        assert conn.vnc_port is None
         assert conn.verify_ssl is True
         assert conn.timeout == 10.0
         assert not conn.is_connected
@@ -108,16 +108,16 @@ class TestWebSocketVNCConnection:
         """Test URL template placeholder substitution."""
         conn = WebSocketVNCConnection(
             url_template="wss://${host}:${port}/api/vnc?"
-            "ticket=${ticket}&pwd=${password}",
+            "port=${vnc_port}&ticket=${ticket}",
             host="proxmox.example.com",
             port=6900,
+            vnc_port=5901,
             ticket="PVE:node:xxxxx",
-            password="secret",
         )
 
         url = conn._substitute_url_template()
         expected = (
-            "wss://proxmox.example.com:6900/api/vnc?ticket=PVE:node:xxxxx&pwd=secret"
+            "wss://proxmox.example.com:6900/api/vnc?port=5901&ticket=PVE:node:xxxxx"
         )
         assert url == expected
 
@@ -135,18 +135,18 @@ class TestWebSocketVNCConnection:
         ):
             conn._substitute_url_template()
 
-    def test_url_template_optional_password(self):
-        """Test URL template with optional password parameter."""
+    def test_url_template_optional_vnc_port(self):
+        """Test URL template with optional vnc_port parameter."""
         conn = WebSocketVNCConnection(
-            url_template="wss://${host}:${port}/vnc?ticket=${ticket}&pwd=${password}",
+            url_template="wss://${host}:${port}/vnc?ticket=${ticket}&port=${vnc_port}",
             host="example.com",
             port=6900,
             ticket="test_ticket",
-            password=None,  # Optional password not provided
+            vnc_port=None,  # Optional vnc_port not provided
         )
 
         url = conn._substitute_url_template()
-        expected = "wss://example.com:6900/vnc?ticket=test_ticket&pwd="
+        expected = "wss://example.com:6900/vnc?ticket=test_ticket&port="
         assert url == expected
 
     def test_disconnect(self):

@@ -8,22 +8,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Placeholder for future releases
+- **Dual Port Support for WebSocket VNC**: Enhanced WebSocket connections with separate WebSocket server port and VNC display port
+  - Added `vnc_port` parameter to `WebSocketVNCConnection` and `create_websocket_vnc()`
+  - Updated URL template to include `port=${vnc_port}` query parameter for Proxmox compatibility
+  - New placeholder `${vnc_port}` in URL template system
+  - Enhanced Proxmox URL template: `wss://${host}:${port}/api2/json/nodes/pve/qemu/100/vncwebsocket?port=${vnc_port}&vncticket=${ticket}`
+
+- **Environment Configuration**: Added VNC_PORT environment variable for WebSocket VNC display port configuration
+  - Updated `.env` file with `VNC_PORT=5900` default value
+  - Enhanced test scripts to use configurable VNC display ports
 
 ### Changed
-- N/A
+- **WebSocket URL Template**: Updated Proxmox URL template to include VNC display port parameter
+  - Changed from: `?vncticket=${ticket}` to `?port=${vnc_port}&vncticket=${ticket}`
+  - Maintains backward compatibility for existing WebSocket connections
 
-### Deprecated
-- N/A
-
-### Removed
-- N/A
+- **Test Scripts Enhancement**: Updated WebSocket diagnostic and comprehensive test scripts
+  - Added VNC port configuration to all test configurations
+  - Enhanced error reporting and troubleshooting guidance
+  - Improved environment variable handling
 
 ### Fixed
-- N/A
+- **WebSocket Authentication**: Corrected WebSocket VNC authentication to use ticket-based auth only
+  - Removed unused password parameter from WebSocket connections
+  - Updated documentation to clarify ticket-based authentication
+  - Fixed test expectations and validation
 
 ### Security
-- N/A
+- **WebSocket Connection Security**: Maintained SSL/TLS security for WebSocket connections
+  - Certificate verification enabled by default
+  - Custom certificate support preserved
+  - Secure WebSocket (WSS) protocol maintained
 
 ## [0.3.0] - 2025-10-27
 

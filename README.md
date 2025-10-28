@@ -101,9 +101,10 @@ from vnc_agent_bridge import create_websocket_vnc
 
 # Connect to WebSocket VNC server (e.g., Proxmox)
 bridge = create_websocket_vnc(
-    url_template="wss://${host}:${port}/api2/json/nodes/pve/qemu/100/vncwebsocket?vncticket=${ticket}",
+    url_template="wss://${host}:${port}/api2/json/nodes/pve/qemu/100/vncwebsocket?port=${vnc_port}&vncticket=${ticket}",
     host="proxmox.example.com",
     port=8006,
+    vnc_port=5900,
     ticket="vncticket123"
 )
 

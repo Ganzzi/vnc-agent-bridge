@@ -3,7 +3,7 @@
 
 __version__ = "0.3.0"
 
-from typing import Optional
+from typing import Dict, Optional
 
 # Import main classes and exceptions
 from .core.bridge import VNCAgentBridge
@@ -37,12 +37,13 @@ connections and wraps RFB 3.8 protocol messages in WebSocket frames.
 def create_websocket_vnc(
     url_template: str,
     host: str,
-    port: int,
+    host_port: int,
     ticket: Optional[str] = None,
-    password: Optional[str] = None,
+    vnc_port: Optional[int] = None,
     certificate_pem: Optional[str] = None,
     verify_ssl: bool = True,
     timeout: float = 10.0,
+    headers: Dict[str, str] = None,
 ) -> VNCAgentBridge:
     """Create VNCAgentBridge instance with WebSocket VNC connection.
 
@@ -52,36 +53,39 @@ def create_websocket_vnc(
     The URL template supports placeholders that get substituted with connection
     parameters:
     - ${host}: Connection hostname
-    - ${port}: Connection port
+    - ${port}: WebSocket server port
+    - ${vnc_port}: VNC display port (optional)
     - ${ticket}: Authentication ticket/token
-    - ${password}: Authentication password (optional)
 
     Example usage:
         # Proxmox WebSocket VNC
         bridge = create_websocket_vnc(
-            url_template="wss://${host}:${port}/api2/json/nodes/pve/qemu/100/vncwebsocket?vncticket=${ticket}",
+            url_template="wss://${host}:${port}/api2/json/nodes/pve/qemu/100/vncwebsocket?port=${vnc_port}&vncticket=${ticket}",
             host="proxmox.example.com",
             port=8006,
+            vnc_port=5900,
             ticket="vncticket123"
         )
 
-        # Custom WebSocket VNC server
+        # Custom WebSocket VNC server with VNC port
         bridge = create_websocket_vnc(
-            url_template="wss://${host}:${port}/vnc/websocket?token=${ticket}",
+            url_template="wss://${host}:${port}/vnc/${vnc_port}/websocket?token=${ticket}",
             host="vnc.example.com",
             port=6900,
+            vnc_port=5901,
             ticket="auth_token"
         )
 
     Args:
-        url_template: URL template with ${} placeholders (host, port, ticket, password)
+        url_template: URL template with ${} placeholders (host, host_port, port, ticket)
         host: VNC server hostname
-        port: VNC server port
+        host_port: WebSocket server port
         ticket: Authentication ticket/token (substitutes ${ticket})
-        password: Authentication password (substitutes ${password})
+        vnc_port: VNC display port (substitutes ${vnc_port}, optional)
         certificate_pem: Optional PEM certificate for SSL verification
         verify_ssl: Whether to verify SSL certificates (default True)
         timeout: Connection timeout in seconds
+        headers: Optional dict of additional HTTP headers
 
     Returns:
         VNCAgentBridge: Configured bridge instance with WebSocket connection
@@ -93,12 +97,13 @@ def create_websocket_vnc(
     connection = WebSocketVNCConnection(
         url_template=url_template,
         host=host,
-        port=port,
+        host_port=host_port,
         ticket=ticket,
-        password=password,
+        vnc_port=vnc_port,
         certificate_pem=certificate_pem,
         verify_ssl=verify_ssl,
         timeout=timeout,
+        headers=headers,
     )
     return VNCAgentBridge(connection=connection)
 

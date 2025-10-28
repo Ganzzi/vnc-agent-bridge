@@ -28,6 +28,7 @@ classifiers = [
 ]
 dependencies = [
     # No production dependencies - uses only Python standard library
+    "dotenv>=0.9.9",
 ]
 
 [project.urls]

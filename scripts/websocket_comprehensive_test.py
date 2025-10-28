@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-Comprehensive VNC Agent Bridge Test Script
-==========================================
+Comprehensive WebSocket VNC Agent Bridge Test Script
+====================================================
 
 This script demonstrates and tests all features of the VNC Agent Bridge package
-against a VNC server running on 192.168.1.5.
+against WebSocket-based VNC servers (Proxmox, noVNC, custom implementations).
 
 Features tested:
 - Mouse control (click, move, drag, position tracking)
@@ -16,10 +16,10 @@ Features tested:
 - Error handling and connection management
 
 Requirements:
-    pip install vnc-agent-bridge[full]
+    pip install vnc-agent-bridge[websocket,full]
 
 Usage:
-    python comprehensive_test.py
+    python websocket_comprehensive_test.py
 """
 
 import time
@@ -27,7 +27,10 @@ import json
 import os
 from pathlib import Path
 from datetime import datetime
-from vnc_agent_bridge import VNCAgentBridge, VNCException
+from vnc_agent_bridge import create_websocket_vnc, VNCException
+import dotenv
+
+dotenv.load_dotenv()
 
 
 def create_test_output_directory():
@@ -35,7 +38,7 @@ def create_test_output_directory():
     output_dir = Path("test_output")
     output_dir.mkdir(exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    test_dir = output_dir / f"test_run_{timestamp}"
+    test_dir = output_dir / f"websocket_test_run_{timestamp}"
     test_dir.mkdir(exist_ok=True)
     return test_dir
 
@@ -89,8 +92,8 @@ def test_keyboard_operations(vnc, output_dir):
     try:
         # Test 1: Type text
         print("\n1. Testing text typing...")
-        vnc.keyboard.type_text("Hello from VNC Agent Bridge!", delay=0.1)
-        print("   ✓ Typed: 'Hello from VNC Agent Bridge!'")
+        vnc.keyboard.type_text("Hello from WebSocket VNC Agent Bridge!", delay=0.1)
+        print("   ✓ Typed: 'Hello from WebSocket VNC Agent Bridge!'")
 
         vnc.keyboard.press_key("return", delay=0.3)
         print("   ✓ Pressed Enter")
@@ -174,13 +177,13 @@ def test_screenshot_operations(vnc, output_dir):
 
         # Test 2: Save screenshot
         print("\n2. Testing screenshot saving...")
-        screenshot_path = output_dir / "full_screenshot.png"
+        screenshot_path = output_dir / "websocket_full_screenshot.png"
         vnc.screenshot.save_image(str(screenshot_path), delay=0.3)
         print(f"   ✓ Saved screenshot to: {screenshot_path}")
 
         # Test 3: Region capture
         print("\n3. Testing region capture...")
-        region_path = output_dir / "region_screenshot.png"
+        region_path = output_dir / "websocket_region_screenshot.png"
         vnc.screenshot.capture_region(100, 100, 300, 200, delay=0.3)
         vnc.screenshot.save_image(str(region_path))
         print(f"   ✓ Captured and saved region (100,100,300x200) to: {region_path}")
@@ -188,7 +191,7 @@ def test_screenshot_operations(vnc, output_dir):
         # Test 4: Different formats
         print("\n4. Testing different image formats...")
         for fmt in ["PNG", "JPEG", "BMP"]:
-            fmt_path = output_dir / f"screenshot.{fmt.lower()}"
+            fmt_path = output_dir / f"websocket_screenshot.{fmt.lower()}"
             vnc.screenshot.save_image(str(fmt_path), format=fmt, delay=0.2)
             print(f"   ✓ Saved {fmt} format to: {fmt_path}")
 
@@ -214,7 +217,7 @@ def test_video_operations(vnc, output_dir):
         print(f"   ✓ Recorded {len(frames)} frames")
 
         # Save the recording
-        video_dir = output_dir / "timed_recording"
+        video_dir = output_dir / "websocket_timed_recording"
         vnc.video.save_frames(frames, str(video_dir))
         print(f"   ✓ Saved frames to: {video_dir}")
 
@@ -229,7 +232,7 @@ def test_video_operations(vnc, output_dir):
         vnc.mouse.move_to(100, 100, delay=0.3)
         vnc.mouse.left_click(delay=0.3)
         time.sleep(1)
-        vnc.keyboard.type_text("Recording in progress...", delay=0.1)
+        vnc.keyboard.type_text("WebSocket VNC recording in progress...", delay=0.1)
         time.sleep(1)
 
         # Stop recording
@@ -238,7 +241,7 @@ def test_video_operations(vnc, output_dir):
         print(f"   ✓ Recorded {len(frames_bg)} frames in background")
 
         # Save background recording
-        bg_video_dir = output_dir / "background_recording"
+        bg_video_dir = output_dir / "websocket_background_recording"
         vnc.video.save_frames(frames_bg, str(bg_video_dir))
         print(f"   ✓ Saved background frames to: {bg_video_dir}")
 
@@ -259,7 +262,7 @@ def test_clipboard_operations(vnc, output_dir):
     try:
         # Test 1: Send text to clipboard
         print("\n1. Testing clipboard text sending...")
-        test_text = "Hello from VNC Agent Bridge clipboard test!"
+        test_text = "Hello from WebSocket VNC Agent Bridge clipboard test!"
         vnc.clipboard.send_text(test_text, delay=0.3)
         print(f"   ✓ Sent text to clipboard: '{test_text}'")
 
@@ -286,6 +289,7 @@ def test_clipboard_operations(vnc, output_dir):
         print("\n4. Testing structured data transfer...")
         test_data = {
             "test_run": datetime.now().isoformat(),
+            "connection_type": "websocket",
             "features_tested": [
                 "mouse",
                 "keyboard",
@@ -294,7 +298,12 @@ def test_clipboard_operations(vnc, output_dir):
                 "video",
                 "clipboard",
             ],
-            "server": "192.168.1.5",
+            "server_config": {
+                "host": os.getenv("PROXMOX_HOST", "unknown"),
+                "port": int(os.getenv("PROXMOX_PORT", "8006")),
+                "node": os.getenv("PROXMOX_NODE", "pve"),
+                "vmid": os.getenv("PROXMOX_VMID", "100"),
+            },
         }
         json_data = json.dumps(test_data, indent=2)
         vnc.clipboard.send_text(json_data, delay=0.3)
@@ -317,43 +326,45 @@ def test_clipboard_operations(vnc, output_dir):
         return False
 
 
-def run_comprehensive_test():
-    """Run the complete test suite."""
-    print("VNC Agent Bridge - Comprehensive Test Suite")
+def run_websocket_comprehensive_test():
+    """Run the complete WebSocket VNC test suite."""
+    print("WebSocket VNC Agent Bridge - Comprehensive Test Suite")
     print("=" * 80)
 
-    # Test multiple servers
-    servers_to_test = [
-        # {"host": "192.168.1.5", "port": 5900, "name": "Server 192.168.1.5"},
-        {"host": "192.168.1.8", "port": 5900, "name": "Server 192.168.1.8"},
-    ]
+    # Get WebSocket configuration from environment
+    proxmox_host = os.getenv("PROXMOX_HOST", "192.168.1.5")
+    proxmox_port = int(os.getenv("PROXMOX_PORT", "8006"))
+    vnc_port = int(os.getenv("VNC_PORT", "5900"))
+    proxmox_node = os.getenv("PROXMOX_NODE", "pve")
+    proxmox_vmid = os.getenv("PROXMOX_VMID", "100")
+    vnc_ticket = os.getenv("VNC_WEBSOCKET_TICKET")
+    proxmox_api_token = os.getenv("PROXMOX_API_TOKEN")
+    certificate_pem = os.getenv("VNC_CERTIFICATE_PEM")
+    # Note: WebSocket VNC uses ticket-based auth, password is not used
 
-    # Get password from environment
-    vnc_password = os.getenv("VNC_PASSWORD", "")
-    if vnc_password:
-        print(f"Using VNC password from VNC_PASSWORD environment variable")
-    else:
-        print("No VNC_PASSWORD environment variable set - testing without password")
+    print("WebSocket VNC Configuration:")
+    print(f"  Host: {proxmox_host}")
+    print(f"  Port: {proxmox_port}")
+    print(f"  Node: {proxmox_node}")
+    print(f"  VM ID: {proxmox_vmid}")
+    print(f"  VNC Ticket: {'Set' if vnc_ticket else 'Not set'}")
+    print(f"  Proxmox API Token: {'Set' if proxmox_api_token else 'Not set'}")
+    print(f"  Certificate PEM: {'Set' if certificate_pem else 'Not set'}")
+    print("  Note: WebSocket VNC uses ticket-based authentication")
 
-    print("=" * 80)
-
-    for server_config in servers_to_test:
+    if not vnc_ticket:
         print(
-            f"\n🎯 Testing {server_config['name']} ({server_config['host']}:{server_config['port']})"
+            "\n⚠️  Warning: VNC_WEBSOCKET_TICKET not set. WebSocket authentication may fail."
         )
-        print("-" * 60)
+        print("   Please update your .env file with the appropriate ticket.")
 
-        test_server(server_config, vnc_password)
+    # URL template for Proxmox
+    # Note: The correct Proxmox format does NOT include port= parameter
+    # Proxmox handles the VNC display port internally
+    url_template = f"wss://${{host}}:${{host_port}}/api2/json/nodes/{proxmox_node}/qemu/{proxmox_vmid}/vncwebsocket?port=${{vnc_port}}&vncticket=${{ticket}}"
 
-
-def test_server(server_config, vnc_password):
-    """Test a specific VNC server."""
-    host = server_config["host"]
-    port = server_config["port"]
-    server_name = server_config["name"]
-
-    print(f"Target VNC Server: {host}:{port}")
-    print(f"Test Start Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"  URL Template: {url_template}")
+    print("=" * 80)
 
     # Create output directory
     output_dir = create_test_output_directory()
@@ -362,22 +373,38 @@ def test_server(server_config, vnc_password):
     # Test results
     results = {
         "start_time": datetime.now().isoformat(),
-        "server": f"{host}:{port}",
-        "server_name": server_name,
+        "connection_type": "websocket",
+        "server_config": {
+            "host": proxmox_host,
+            "port": proxmox_port,
+            "node": proxmox_node,
+            "vmid": proxmox_vmid,
+            "url_template": url_template,
+            "certificate_pem": "Set" if certificate_pem else "Not set",
+        },
         "tests": {},
         "output_directory": str(output_dir),
     }
 
+    headers = {
+        "Authorization": f"PVEAPIToken={proxmox_api_token}",
+    }
+
     try:
-        # Connect to VNC server
-        print("\n🔌 Connecting to VNC server...")
-        with VNCAgentBridge(
-            host,
-            port=port,
-            timeout=30.0,  # Increased timeout
-            password=vnc_password,
+        # Connect to WebSocket VNC server
+        print("\n🔌 Connecting to WebSocket VNC server...")
+        with create_websocket_vnc(
+            url_template=url_template,
+            host=proxmox_host,
+            host_port=proxmox_port,
+            vnc_port=vnc_port,  # Default VNC display port
+            ticket=vnc_ticket,
+            certificate_pem=certificate_pem,
+            verify_ssl=False,  # Often self-signed certificates
+            timeout=30.0,  # Increased timeout for WebSocket
+            headers=headers,
         ) as vnc:
-            print("✓ Connected successfully")
+            print("✓ WebSocket VNC connected successfully")
 
             # Run all tests
             test_functions = [
@@ -403,7 +430,7 @@ def test_server(server_config, vnc_password):
 
             # Summary
             print("\n" + "=" * 60)
-            print("TEST SUMMARY")
+            print("WEBSOCKET VNC TEST SUMMARY")
             print("=" * 60)
             print(
                 f"Overall Result: {'ALL TESTS PASSED ✓' if all_passed else 'SOME TESTS FAILED ✗'}"
@@ -418,13 +445,13 @@ def test_server(server_config, vnc_password):
             results["end_time"] = datetime.now().isoformat()
 
             # Save results
-            results_file = output_dir / "test_results.json"
+            results_file = output_dir / "websocket_test_results.json"
             with open(results_file, "w") as f:
                 json.dump(results, f, indent=2)
             print(f"\n📄 Detailed results saved to: {results_file}")
 
     except VNCException as e:
-        print(f"\n❌ VNC Error: {e}")
+        print(f"\n❌ WebSocket VNC Error: {e}")
         results["overall_result"] = f"VNC_ERROR: {str(e)}"
     except Exception as e:
         print(f"\n💥 Unexpected error: {e}")
@@ -433,15 +460,17 @@ def test_server(server_config, vnc_password):
     # Save final results even if connection failed
     results["end_time"] = datetime.now().isoformat()
     try:
-        results_file = output_dir / "test_results.json"
+        results_file = output_dir / "websocket_test_results.json"
         with open(results_file, "w") as f:
             json.dump(results, f, indent=2)
         print(f"📄 Error results saved to: {results_file}")
     except:
         print("Could not save results file")
 
-    print(f"\n🏁 Test completed at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print(
+        f"\n🏁 WebSocket VNC test completed at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+    )
 
 
 if __name__ == "__main__":
-    run_comprehensive_test()
+    run_websocket_comprehensive_test()

@@ -9,7 +9,7 @@ WebSocket VNC connections provide several advantages over traditional TCP connec
 - **Security**: WebSocket Secure (WSS) provides encrypted communication
 - **Compatibility**: Works through firewalls and proxies that allow HTTP/HTTPS
 - **Flexibility**: URL-based configuration supports various VNC server implementations
-- **Authentication**: Built-in support for ticket-based and password authentication
+- **Authentication**: Built-in support for ticket-based
 
 ## Installation
 
@@ -50,22 +50,22 @@ WebSocket connections use URL templates with placeholder substitution. The follo
 - `${host}`: VNC server hostname
 - `${port}`: VNC server port
 - `${ticket}`: Authentication ticket/token
-- `${password}`: Authentication password (optional)
 
 ### Common URL Templates
 
 #### Proxmox VE
 
 ```python
-url_template = "wss://${host}:${port}/api2/json/nodes/${node}/qemu/${vmid}/vncwebsocket?vncticket=${ticket}"
+url_template = "wss://${host}:${port}/api2/json/nodes/${node}/qemu/${vmid}/vncwebsocket?port=${vnc_port}&vncticket=${ticket}"
 ```
 
 Example:
 ```python
 bridge = create_websocket_vnc(
-    url_template="wss://${host}:${port}/api2/json/nodes/pve/qemu/100/vncwebsocket?vncticket=${ticket}",
+    url_template="wss://${host}:${port}/api2/json/nodes/pve/qemu/100/vncwebsocket?port=${vnc_port}&vncticket=${ticket}",
     host="proxmox.example.com",
     port=8006,
+    vnc_port=5900,
     ticket="vncticket123"
 )
 ```
@@ -82,23 +82,6 @@ bridge = create_websocket_vnc(
     url_template="wss://${host}:${port}/websockify",
     host="vnc.example.com",
     port=6080
-)
-```
-
-#### Custom VNC WebSocket Server
-
-```python
-url_template = "wss://${host}:${port}/vnc/websocket?token=${ticket}&password=${password}"
-```
-
-Example:
-```python
-bridge = create_websocket_vnc(
-    url_template="wss://${host}:${port}/vnc/websocket?token=${ticket}&password=${password}",
-    host="vnc.example.com",
-    port=6900,
-    ticket="auth_token",
-    password="secret_password"
 )
 ```
 
@@ -165,33 +148,6 @@ bridge = create_websocket_vnc(
     host="proxmox.example.com",
     port=8006,
     ticket="vncticket_abc123def456"
-)
-```
-
-### Password Authentication
-
-Some servers support password authentication:
-
-```python
-bridge = create_websocket_vnc(
-    url_template="wss://${host}:${port}/vnc/websocket?password=${password}",
-    host="vnc.example.com",
-    port=6900,
-    password="my_vnc_password"
-)
-```
-
-### Combined Authentication
-
-Use both ticket and password when required:
-
-```python
-bridge = create_websocket_vnc(
-    url_template="wss://${host}:${port}/vnc/websocket?ticket=${ticket}&password=${password}",
-    host="secure-vnc.example.com",
-    port=8443,
-    ticket="session_ticket",
-    password="user_password"
 )
 ```
 

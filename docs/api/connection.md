@@ -467,9 +467,10 @@ bridge = create_websocket_vnc(
 ```python
 # Proxmox WebSocket VNC
 bridge = create_websocket_vnc(
-    url_template="wss://${host}:${port}/api2/json/nodes/pve/qemu/100/vncwebsocket?vncticket=${ticket}",
+    url_template="wss://${host}:${port}/api2/json/nodes/pve/qemu/100/vncwebsocket?port=${vnc_port}&vncticket=${ticket}",
     host="proxmox.example.com",
     port=8006,
+    vnc_port=5900,
     ticket="PVEVNC:abc123..."
 )
 ```
@@ -660,29 +661,6 @@ bridge = create_websocket_vnc(
     host="vnc.example.com",
     port=6900,
     ticket="session_ticket_12345"
-)
-```
-
-### Password Authentication
-
-```python
-bridge = create_websocket_vnc(
-    url_template="wss://${host}:${port}/vnc?password=${password}",
-    host="vnc.example.com",
-    port=6900,
-    password="my_secure_password"
-)
-```
-
-### Combined Authentication
-
-```python
-bridge = create_websocket_vnc(
-    url_template="wss://${host}:${port}/vnc?token=${ticket}&password=${password}",
-    host="vnc.example.com",
-    port=6900,
-    ticket="session_token",
-    password="user_password"
 )
 ```
 
