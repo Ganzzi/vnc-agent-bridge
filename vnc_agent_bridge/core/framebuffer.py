@@ -180,3 +180,8 @@ class FramebufferManager:
         dirty = self._is_dirty
         self._is_dirty = False  # Reset dirty flag
         return dirty
+
+    @property
+    def is_initialized(self) -> bool:
+        """Check if framebuffer buffer is initialized."""
+        return self._buffer is not None

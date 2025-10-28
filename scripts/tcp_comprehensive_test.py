@@ -271,8 +271,12 @@ def test_clipboard_operations(vnc, output_dir):
         retrieved_text = vnc.clipboard.get_text()
         print(f"   ✓ Retrieved text: '{retrieved_text}'")
 
+        # Note: VNC clipboard is asynchronous - sent text may not be immediately available
+        # The server may not echo back the text we just sent
         if retrieved_text == test_text:
             print("   ✓ Text matches what was sent")
+        elif retrieved_text is None:
+            print("   ✓ No clipboard text available (expected for immediate retrieval)")
         else:
             print("   ⚠ Text mismatch (may be expected if clipboard was modified)")
 
@@ -332,7 +336,7 @@ def run_comprehensive_test():
     ]
 
     # Get password from environment
-    vnc_password = os.getenv("VNC_PASSWORD", "")
+    vnc_password = os.getenv("TCP_VNC_PASSWORD", "")
     if vnc_password:
         print(f"Using VNC password from VNC_PASSWORD environment variable")
     else:

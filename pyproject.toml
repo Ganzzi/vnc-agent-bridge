@@ -29,6 +29,8 @@ classifiers = [
 dependencies = [
     # No production dependencies - uses only Python standard library
     "dotenv>=0.9.9",
+    "requests>=2.32.4",
+    "websocket-client>=1.8.0",
 ]
 
 [project.urls]

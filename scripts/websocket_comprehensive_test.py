@@ -271,8 +271,12 @@ def test_clipboard_operations(vnc, output_dir):
         retrieved_text = vnc.clipboard.get_text()
         print(f"   ✓ Retrieved text: '{retrieved_text}'")
 
+        # Note: VNC clipboard is asynchronous - sent text may not be immediately available
+        # The server may not echo back the text we just sent
         if retrieved_text == test_text:
             print("   ✓ Text matches what was sent")
+        elif retrieved_text is None:
+            print("   ✓ No clipboard text available (expected for immediate retrieval)")
         else:
             print("   ⚠ Text mismatch (may be expected if clipboard was modified)")
 
@@ -299,10 +303,10 @@ def test_clipboard_operations(vnc, output_dir):
                 "clipboard",
             ],
             "server_config": {
-                "host": os.getenv("PROXMOX_HOST", "unknown"),
-                "port": int(os.getenv("PROXMOX_PORT", "8006")),
-                "node": os.getenv("PROXMOX_NODE", "pve"),
-                "vmid": os.getenv("PROXMOX_VMID", "100"),
+                "host": os.getenv("WEBSOCKET_VNC_HOST", "unknown"),
+                "port": int(os.getenv("WEBSOCKET_VNC_HOST_PORT", "8006")),
+                "node": os.getenv("WEBSOCKET_VNC_NODE", "pve"),
+                "vmid": os.getenv("WEBSOCKET_VNC_VMID", "100"),
             },
         }
         json_data = json.dumps(test_data, indent=2)
@@ -332,14 +336,14 @@ def run_websocket_comprehensive_test():
     print("=" * 80)
 
     # Get WebSocket configuration from environment
-    proxmox_host = os.getenv("PROXMOX_HOST", "192.168.1.5")
-    proxmox_port = int(os.getenv("PROXMOX_PORT", "8006"))
-    vnc_port = int(os.getenv("VNC_PORT", "5900"))
-    proxmox_node = os.getenv("PROXMOX_NODE", "pve")
-    proxmox_vmid = os.getenv("PROXMOX_VMID", "100")
-    vnc_ticket = os.getenv("VNC_WEBSOCKET_TICKET")
-    proxmox_api_token = os.getenv("PROXMOX_API_TOKEN")
-    certificate_pem = os.getenv("VNC_CERTIFICATE_PEM")
+    proxmox_host = os.getenv("WEBSOCKET_VNC_HOST", "192.168.1.5")
+    proxmox_port = int(os.getenv("WEBSOCKET_VNC_HOST_PORT", "8006"))
+    vnc_port = int(os.getenv("WEBSOCKET_VNC_PORT", "5900"))
+    proxmox_node = os.getenv("WEBSOCKET_VNC_NODE", "pve")
+    proxmox_vmid = os.getenv("WEBSOCKET_VNC_VMID", "100")
+    vnc_ticket = os.getenv("WEBSOCKET_VNC_TICKET")
+    proxmox_api_token = os.getenv("WEBSOCKET_VNC_API_TOKEN")
+    certificate_pem = os.getenv("WEBSOCKET_VNC_CERTIFICATE_PEM")
     # Note: WebSocket VNC uses ticket-based auth, password is not used
 
     print("WebSocket VNC Configuration:")
@@ -354,7 +358,7 @@ def run_websocket_comprehensive_test():
 
     if not vnc_ticket:
         print(
-            "\n⚠️  Warning: VNC_WEBSOCKET_TICKET not set. WebSocket authentication may fail."
+            "\n⚠️  Warning: WEBSOCKET_VNC_TICKET not set. WebSocket authentication may fail."
         )
         print("   Please update your .env file with the appropriate ticket.")
 

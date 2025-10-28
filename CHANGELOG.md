@@ -14,8 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - New placeholder `${vnc_port}` in URL template system
   - Enhanced Proxmox URL template: `wss://${host}:${port}/api2/json/nodes/pve/qemu/100/vncwebsocket?port=${vnc_port}&vncticket=${ticket}`
 
-- **Environment Configuration**: Added VNC_PORT environment variable for WebSocket VNC display port configuration
-  - Updated `.env` file with `VNC_PORT=5900` default value
+- **Environment Configuration**: Added WEBSOCKET_VNC_PORT environment variable for WebSocket VNC display port configuration
+  - Updated `.env` file with `WEBSOCKET_VNC_PORT=5900` default value
   - Enhanced test scripts to use configurable VNC display ports
 
 ### Changed
@@ -29,6 +29,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Improved environment variable handling
 
 ### Fixed
+- **Screenshot Format Error**: Fixed PNG format error in screenshot tests by using ImageFormat enum instead of strings
+  - Updated TCP and WebSocket screenshot test scripts to use `ImageFormat.PNG`, `ImageFormat.JPEG`, `ImageFormat.BMP`
+  - Added proper imports for `ImageFormat` enum
+  - Fixed WebSocket screenshot test to use correct method names (`save` instead of `save_image`)
+
 - **WebSocket Authentication**: Corrected WebSocket VNC authentication to use ticket-based auth only
   - Removed unused password parameter from WebSocket connections
   - Updated documentation to clarify ticket-based authentication

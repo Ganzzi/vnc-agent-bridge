@@ -45,6 +45,11 @@ pip install vnc-agent-bridge[websocket]
 pip install vnc-agent-bridge[full]
 ```
 
+### With WebSocket Support
+```bash
+pip install vnc-agent-bridge[websocket]
+```
+
 ### From Source
 ```bash
 git clone https://github.com/Ganzzi/vnc-agent-bridge.git
@@ -264,6 +269,7 @@ black vnc_agent_bridge tests
 - ✅ **v0.1.0**: Core functionality released on PyPI
 - ✅ **v0.2.0**: Stable release with capture features on PyPI and GitHub
 - ✅ **v0.3.0**: WebSocket VNC support and modular architecture on PyPI and GitHub
+- ✅ **v0.3.0 Fixes**: Screenshot format errors fixed, WebSocket authentication corrected
 - 🎯 **v0.3.0 Features**: WebSocket connections, URL templates, server-agnostic design
 -  **Next Milestone**: Community feedback and future enhancements
 

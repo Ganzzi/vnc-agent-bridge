@@ -15,22 +15,22 @@ import dotenv
 dotenv.load_dotenv()
 
 # Configuration
-PROXMOX_HOST = os.getenv("PROXMOX_HOST", "192.168.1.224")
-PROXMOX_PORT = int(os.getenv("PROXMOX_PORT", "8006"))
-PROXMOX_NODE = os.getenv("PROXMOX_NODE", "pve")
-PROXMOX_VMID = os.getenv("PROXMOX_VMID", "100")
-PROXMOX_TOKEN = os.getenv("PROXMOX_API_TOKEN")
+WEBSOCKET_VNC_HOST = os.getenv("WEBSOCKET_VNC_HOST", "192.168.1.224")
+WEBSOCKET_VNC_HOST_PORT = int(os.getenv("WEBSOCKET_VNC_HOST_PORT", "8006"))
+WEBSOCKET_VNC_NODE = os.getenv("WEBSOCKET_VNC_NODE", "pve")
+WEBSOCKET_VNC_VMID = os.getenv("WEBSOCKET_VNC_VMID", "100")
+WEBSOCKET_VNC_TOKEN = os.getenv("WEBSOCKET_VNC_API_TOKEN")
 
-if not PROXMOX_TOKEN:
-    print("Error: PROXMOX_API_TOKEN not set in .env file")
+if not WEBSOCKET_VNC_TOKEN:
+    print("Error: WEBSOCKET_VNC_API_TOKEN not set in .env file")
     print("Expected format: test@pam!test=91eb1dff-12ba-4c53-9528-1a4d18883c98")
     exit(1)
 
 # Construct API endpoint
-url = f"https://{PROXMOX_HOST}:{PROXMOX_PORT}/api2/json/nodes/{PROXMOX_NODE}/qemu/{PROXMOX_VMID}/vncproxy"
+url = f"https://{WEBSOCKET_VNC_HOST}:{WEBSOCKET_VNC_HOST_PORT}/api2/json/nodes/{WEBSOCKET_VNC_NODE}/qemu/{WEBSOCKET_VNC_VMID}/vncproxy"
 
 headers = {
-    "Authorization": f"PVEAPIToken={PROXMOX_TOKEN}",
+    "Authorization": f"PVEAPIToken={WEBSOCKET_VNC_TOKEN}",
     "Content-Type": "application/json",
 }
 
@@ -54,7 +54,7 @@ try:
         if ticket:
             print("\n✓ Successfully retrieved WebSocket ticket!")
             print(f"\nUpdate your .env file with:")
-            print(f"VNC_WEBSOCKET_TICKET={ticket}")
+            print(f"WEBSOCKET_VNC_TICKET={ticket}")
             print(f"\nTicket details:")
             print(f"  Ticket: {ticket[:50]}...")
             print(f"  Port: {port}")
@@ -65,16 +65,16 @@ try:
             if env_file.exists():
                 content = env_file.read_text()
                 # Replace or add the ticket
-                if "VNC_WEBSOCKET_TICKET=" in content:
+                if "WEBSOCKET_VNC_TICKET=" in content:
                     import re
 
                     content = re.sub(
-                        r"VNC_WEBSOCKET_TICKET=.*",
-                        f"VNC_WEBSOCKET_TICKET={ticket}",
+                        r"WEBSOCKET_VNC_TICKET=.*",
+                        f"WEBSOCKET_VNC_TICKET={ticket}",
                         content,
                     )
                 else:
-                    content += f"\nVNC_WEBSOCKET_TICKET={ticket}\n"
+                    content += f"\nWEBSOCKET_VNC_TICKET={ticket}\n"
 
                 env_file.write_text(content)
                 print(f"\n✓ Updated .env file automatically")
@@ -89,6 +89,8 @@ try:
 except Exception as e:
     print(f"\n✗ Error: {e}")
     print("\nTroubleshooting:")
-    print("  1. Check PROXMOX_API_TOKEN is correct in .env")
+    print("  1. Check WEBSOCKET_VNC_API_TOKEN is correct in .env")
     print("  2. Verify Proxmox server is accessible")
-    print("  3. Ensure VM exists (PROXMOX_NODE and PROXMOX_VMID are correct)")
+    print(
+        "  3. Ensure VM exists (WEBSOCKET_VNC_NODE and WEBSOCKET_VNC_VMID are correct)"
+    )

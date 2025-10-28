@@ -80,6 +80,10 @@ class ScreenshotController:
         if delay > 0:
             time.sleep(delay)
 
+        # Initialize framebuffer if not already done
+        if not self.framebuffer.is_initialized:
+            self.framebuffer.initialize_buffer()
+
         # Request framebuffer update
         self.framebuffer.request_update(incremental=incremental)
 
@@ -127,6 +131,10 @@ class ScreenshotController:
 
         if delay > 0:
             time.sleep(delay)
+
+        # Initialize framebuffer if not already done
+        if not self.framebuffer.is_initialized:
+            self.framebuffer.initialize_buffer()
 
         # Request update for specific region
         self.framebuffer.request_update(
