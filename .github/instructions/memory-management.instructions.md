@@ -11,14 +11,14 @@ applyTo: '**'
 
 The VNC Agent Bridge project uses 8 active memories to maintain development context:
 
-1. **Project Overview** (ID: 1) - Purpose, features, tech stack, timeline, open-source goals
-2. **Architecture Design** (ID: 2) - Class hierarchy, design patterns, 5-layer structure
-3. **API Design** (ID: 3) - Method signatures, parameters, return types, exceptions
-4. **Configuration** (ID: 4) - Environment setup, uv venv, dependencies, OS/tech choices, Python 3.8+
-5. **Development Status** (ID: 5) - Current phase, progress, blockers, milestones, daily updates
-6. **Testing Strategy** (ID: 6) - Test approach (mock-based), coverage targets (85%+), mypy compliance (100%)
-7. **Library References** (ID: 7) - VNC protocol details, common patterns, pytest patterns, type hints
-8. **Issues and Bugs** (ID: 8) - Detailed bug reports with diagnostics (populated during development)
+1. **Project Overview** - Purpose, features, tech stack, timeline, open-source goals
+2. **Architecture Design** - Class hierarchy, design patterns, 5-layer structure
+3. **API Design** - Method signatures, parameters, return types, exceptions
+4. **Configuration** - Environment setup, uv venv, dependencies, OS/tech choices, Python 3.8+
+5. **Development Status** - Current phase, progress, blockers, milestones, daily updates
+6. **Testing Strategy** - Test approach (mock-based), coverage targets (85%+), mypy compliance (100%)
+7. **Library References** - VNC protocol details, common patterns, pytest patterns, type hints
+8. **Issues and Bugs** - Detailed bug reports with diagnostics (populated during development)
 
 ## When to Access Memories
 
