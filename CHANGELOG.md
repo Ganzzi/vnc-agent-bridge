@@ -5,47 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-
-### Added
-- **Dual Port Support for WebSocket VNC**: Enhanced WebSocket connections with separate WebSocket server port and VNC display port
-  - Added `vnc_port` parameter to `WebSocketVNCConnection` and `create_websocket_vnc()`
-  - Updated URL template to include `port=${vnc_port}` query parameter for Proxmox compatibility
-  - New placeholder `${vnc_port}` in URL template system
-  - Enhanced Proxmox URL template: `wss://${host}:${port}/api2/json/nodes/pve/qemu/100/vncwebsocket?port=${vnc_port}&vncticket=${ticket}`
-
-- **Environment Configuration**: Added WEBSOCKET_VNC_PORT environment variable for WebSocket VNC display port configuration
-  - Updated `.env` file with `WEBSOCKET_VNC_PORT=5900` default value
-  - Enhanced test scripts to use configurable VNC display ports
-
-### Changed
-- **WebSocket URL Template**: Updated Proxmox URL template to include VNC display port parameter
-  - Changed from: `?vncticket=${ticket}` to `?port=${vnc_port}&vncticket=${ticket}`
-  - Maintains backward compatibility for existing WebSocket connections
-
-- **Test Scripts Enhancement**: Updated WebSocket diagnostic and comprehensive test scripts
-  - Added VNC port configuration to all test configurations
-  - Enhanced error reporting and troubleshooting guidance
-  - Improved environment variable handling
-
-### Fixed
-- **Screenshot Format Error**: Fixed PNG format error in screenshot tests by using ImageFormat enum instead of strings
-  - Updated TCP and WebSocket screenshot test scripts to use `ImageFormat.PNG`, `ImageFormat.JPEG`, `ImageFormat.BMP`
-  - Added proper imports for `ImageFormat` enum
-  - Fixed WebSocket screenshot test to use correct method names (`save` instead of `save_image`)
-
-- **WebSocket Authentication**: Corrected WebSocket VNC authentication to use ticket-based auth only
-  - Removed unused password parameter from WebSocket connections
-  - Updated documentation to clarify ticket-based authentication
-  - Fixed test expectations and validation
-
-### Security
-- **WebSocket Connection Security**: Maintained SSL/TLS security for WebSocket connections
-  - Certificate verification enabled by default
-  - Custom certificate support preserved
-  - Secure WebSocket (WSS) protocol maintained
-
-## [0.3.0] - 2025-10-27
+## [0.3.0] - 2025-10-28
 
 ### Added
 - **WebSocket VNC Support**: Generic WebSocket connections with URL templates
@@ -68,6 +28,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Working examples in `examples/websocket_usage.py` (400+ lines)
   - Multiple server configuration examples (Proxmox, noVNC, custom)
 
+- **Dual Port Support for WebSocket VNC**: Enhanced WebSocket connections with separate WebSocket server port and VNC display port
+  - Added `vnc_port` parameter to `WebSocketVNCConnection` and `create_websocket_vnc()`
+  - Updated URL template to include `port=${vnc_port}` query parameter for Proxmox compatibility
+  - New placeholder `${vnc_port}` in URL template system
+  - Enhanced Proxmox URL template: `wss://${host}:${port}/api2/json/nodes/pve/qemu/100/vncwebsocket?port=${vnc_port}&vncticket=${ticket}`
+
+- **Environment Configuration**: Added WEBSOCKET_VNC_PORT environment variable for WebSocket VNC display port configuration
+  - Updated `.env` file with `WEBSOCKET_VNC_PORT=5900` default value
+  - Enhanced test scripts to use configurable VNC display ports
+
 ### Changed
 - **Architecture Refactoring**: Connection classes reorganized for modularity
   - `VNCConnection` moved to `connection_tcp.py` as `TCPVNCConnection`
@@ -82,6 +52,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - 100% black formatting
   - 85%+ test coverage maintained
 
+- **WebSocket URL Template**: Updated Proxmox URL template to include VNC display port parameter
+  - Changed from: `?vncticket=${ticket}` to `?port=${vnc_port}&vncticket=${ticket}`
+  - Maintains backward compatibility for existing WebSocket connections
+
+- **Test Scripts Enhancement**: Updated WebSocket diagnostic and comprehensive test scripts
+  - Added VNC port configuration to all test configurations
+  - Enhanced error reporting and troubleshooting guidance
+  - Improved environment variable handling
+
 ### Removed
 - **Deprecated Code Cleanup**: Removed legacy monolithic connection implementation
   - Deleted `vnc_agent_bridge/core/connection.py` (functionality preserved in modular files)
@@ -94,12 +73,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Documentation examples updated with correct import paths
   - No remaining references to deprecated `connection.py` module
 
+- **Screenshot Format Error**: Fixed PNG format error in screenshot tests by using ImageFormat enum instead of strings
+  - Updated TCP and WebSocket screenshot test scripts to use `ImageFormat.PNG`, `ImageFormat.JPEG`, `ImageFormat.BMP`
+  - Added proper imports for `ImageFormat` enum
+  - Fixed WebSocket screenshot test to use correct method names (`save` instead of `save_image`)
+
+- **WebSocket Authentication**: Corrected WebSocket VNC authentication to use ticket-based auth only
+  - Removed unused password parameter from WebSocket connections
+  - Updated documentation to clarify ticket-based authentication
+  - Fixed test expectations and validation
+
 ### Security
 - **WebSocket Security**: Enhanced security for WebSocket connections
   - SSL certificate verification enabled by default
   - Support for custom SSL certificates
   - Secure WebSocket (WSS) protocol support
   - Authentication via tickets and passwords (user responsibility for credential security)
+
+- **WebSocket Connection Security**: Maintained SSL/TLS security for WebSocket connections
+  - Certificate verification enabled by default
+  - Custom certificate support preserved
+  - Secure WebSocket (WSS) protocol maintained
 
 ## [0.2.0] - 2025-10-27
 
