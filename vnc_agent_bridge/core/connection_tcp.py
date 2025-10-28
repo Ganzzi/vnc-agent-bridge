@@ -17,6 +17,7 @@ from ..exceptions import (
     VNCTimeoutError,
     VNCProtocolError,
     VNCStateError,
+    VNCAuthenticationError,
 )
 
 
@@ -337,29 +338,184 @@ class TCPVNCConnection(VNCConnectionBase):
         # Step 2: Send our protocol version
         self._send_raw(self.PROTOCOL_VERSION)
 
-        # Step 3: Authentication (simplified - no auth for now)
-        # In full implementation, this would handle various auth types
-        # For now, assume no authentication required
-        auth_result = self._recv_exact(4)  # Security type response
-        security_type = struct.unpack("!I", auth_result)[0]
+        # Step 3: Receive and handle security type(s)
+        # RFB 3.8+ sends: 1 byte (number of security types) + N bytes (security types)
+        # RFB 3.3-3.7 sends: 4 bytes (single security type, big-endian integer)
+        num_security_types = struct.unpack("!B", self._recv_exact(1))[0]
 
-        if security_type == 0:  # Connection failed
+        if num_security_types == 0:
+            # Connection failed - server sends reason string
             reason_length = struct.unpack("!I", self._recv_exact(4))[0]
             reason = self._recv_exact(reason_length).decode()
             raise VNCConnectionError(f"VNC server refused connection: {reason}")
-        elif security_type == 1:  # No authentication
-            # Send client init (shared flag = 1)
-            self._send_raw(struct.pack("!B", 1))
-        else:
-            # For now, only support no-auth. Full implementation would handle
-            # VNC authentication, VNCAuth, etc.
-            raise VNCProtocolError(f"Unsupported security type: {security_type}")
 
-        # Step 4: Receive server init (framebuffer info)
-        # We don't need the full framebuffer info for basic input operations
-        # Skip the server init message for now
-        # In full implementation: width, height, pixel format, name, etc.
-        pass
+        # Read the security types list
+        security_types = []
+        for _ in range(num_security_types):
+            security_type = struct.unpack("!B", self._recv_exact(1))[0]
+            security_types.append(security_type)
+
+        # Select supported security type priority: no-auth (1) > VNC auth (2)
+        selected_security_type = None
+        if 1 in security_types:  # No authentication (preferred)
+            selected_security_type = 1
+        elif 2 in security_types:  # VNC authentication
+            selected_security_type = 2
+        elif security_types:  # Accept any available type as fallback
+            selected_security_type = security_types[0]
+        else:
+            raise VNCProtocolError("No valid security types available")
+
+        # Step 4: Send selected security type
+        self._send_raw(struct.pack("!B", selected_security_type))
+
+        # Step 5: Handle authentication based on selected type
+        if selected_security_type == 1:  # No authentication
+            # No auth needed, proceed directly to ClientInit
+            pass
+        elif selected_security_type == 2:  # VNC authentication
+            # VNC Auth: challenge-response based on DES
+            # Receive 16-byte challenge from server
+            challenge = self._recv_exact(16)
+
+            # Generate response using password
+            # If no password provided, use empty password
+            password = self.password or ""
+            response = self._vnc_auth_response(challenge, password)
+
+            # Send 16-byte response
+            self._send_raw(response)
+
+            # Receive authentication result (4 bytes, 0=ok, non-zero=failed)
+            auth_result = struct.unpack("!I", self._recv_exact(4))[0]
+            if auth_result != 0:
+                raise VNCAuthenticationError(
+                    "VNC authentication failed - invalid password"
+                )
+        else:
+            # Other auth types not yet supported
+            raise VNCProtocolError(
+                f"Unsupported security type: {selected_security_type}"
+            )
+
+        # Step 6: Send ClientInit message
+        # Format: [1 byte: shared flag] (1 = shared desktop)
+        self._send_raw(struct.pack("!B", 1))
+
+        # Step 7: Receive ServerInit message (minimal parsing)
+        # Format: [2 bytes: framebuffer width][2 bytes: framebuffer height]
+        #         [pixel_format (16 bytes)][4 bytes: name length][name string]
+        # We skip most of this but need to read it to maintain protocol sync
+        server_init_header = self._recv_exact(4)
+        width, height = struct.unpack("!HH", server_init_header)
+
+        # Skip pixel format (16 bytes) and name length (4 bytes)
+        pixel_format = self._recv_exact(16)
+        name_length = struct.unpack("!I", self._recv_exact(4))[0]
+
+        # Skip name string
+        if name_length > 0:
+            self._recv_exact(name_length)
+
+    def _vnc_auth_response(self, challenge: bytes, password: str) -> bytes:
+        """Generate VNC authentication response.
+
+        Implements the VNC authentication challenge-response mechanism using DES.
+        Per RFC 6143 Section 7.2.2.
+
+        IMPORTANT NOTES:
+        1. VNC authentication truncates passwords to 8 bytes maximum
+        2. Each password byte must have its bits reversed (RFB protocol quirk)
+        3. Padded to 8-byte boundary with null bytes
+        4. Each 8-byte block of challenge encrypted with DES-ECB using password bytes as key
+
+        Args:
+            challenge: 16-byte challenge from server
+            password: Password string (will be truncated to 8 bytes)
+
+        Returns:
+            16-byte response for server
+        """
+        import sys
+
+        # Encode password to bytes
+        password_encoded = password.encode("latin-1")
+
+        # VNC truncates password to 8 bytes maximum (historical limitation)
+        password_encoded = password_encoded[:8]
+
+        # CRITICAL FIX: VNC requires bit-reversal of password bytes!
+        # This is a historical quirk of the RFB protocol, necessary for compatibility
+        def reverse_bits(byte_val: int) -> int:
+            """Reverse the bits of a byte (0-255)."""
+            result = 0
+            for i in range(8):
+                result = (result << 1) | ((byte_val >> i) & 1)
+            return result
+
+        # Reverse bits in each password byte
+        password_encoded = bytes(reverse_bits(b) for b in password_encoded)
+
+        # Pad password to 8 bytes with nulls
+        password_padded = (password_encoded + b"\x00" * 8)[:8]
+
+        try:
+            # Try pycryptodome first (most reliable)
+            from Crypto.Cipher import DES  # type: ignore
+
+            # VNC standard: Use 8-byte password key to encrypt both 8-byte blocks of 16-byte challenge
+            response = b""
+            cipher = DES.new(password_padded, DES.MODE_ECB)
+
+            # Encrypt first 8 bytes of challenge
+            response += cipher.encrypt(challenge[:8])
+
+            # Encrypt second 8 bytes of challenge
+            response += cipher.encrypt(challenge[8:16])
+
+            return response
+        except ImportError:
+            pass
+
+        try:
+            # Try pyDES library as fallback
+            from des import DES  # type: ignore
+
+            response = b""
+            des = DES(password_padded, DES.MODE_ECB)
+            response += des.encrypt(challenge[:8])
+            response += des.encrypt(challenge[8:16])
+
+            return response
+        except ImportError:
+            pass
+
+        try:
+            # Try using cryptography library with DES
+            from cryptography.hazmat.primitives.ciphers import Cipher, algorithms
+            from cryptography.hazmat.backends import default_backend
+
+            response = b""
+            cipher = Cipher(
+                algorithms.DES(password_padded), mode=None, backend=default_backend()
+            )
+            encryptor = cipher.encryptor()
+            response += encryptor.update(challenge[:8]) + encryptor.finalize()
+
+            encryptor2 = cipher.encryptor()
+            response += encryptor2.update(challenge[8:16]) + encryptor2.finalize()
+
+            return response
+        except (ImportError, AttributeError):
+            pass
+
+        # All DES libraries failed - provide helpful error
+        raise VNCProtocolError(
+            "DES encryption not available. Install one of:\n"
+            "  - pip install pycryptodome (recommended)\n"
+            "  - pip install pyDES\n"
+            "VNC authentication (Type 2) requires proper DES-ECB encryption."
+        )
 
     def _send_raw(self, data: bytes) -> None:
         """Send raw bytes to server.

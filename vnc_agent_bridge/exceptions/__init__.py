@@ -59,6 +59,19 @@ class VNCConnectionError(VNCException):
     pass
 
 
+class VNCAuthenticationError(VNCConnectionError):
+    """Raised when VNC authentication fails.
+
+    This exception indicates that the authentication attempt to the VNC
+    server failed. Common causes include:
+        - Invalid or missing password
+        - Unsupported authentication method
+        - Authentication timeout
+    """
+
+    pass
+
+
 class VNCTimeoutError(VNCException):
     """Raised when an operation times out.
 
@@ -112,6 +125,7 @@ class VNCProtocolError(VNCException):
 __all__ = [
     "VNCException",
     "VNCConnectionError",
+    "VNCAuthenticationError",
     "VNCTimeoutError",
     "VNCInputError",
     "VNCStateError",
